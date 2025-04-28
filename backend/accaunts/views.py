@@ -10,6 +10,8 @@ import datetime, random, string
 from django.core.mail import send_mail
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from google.oauth2 import id_token
+from google.auth.transport.requests import Request
 
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -104,7 +106,7 @@ class ForgotAPIView(APIView):
         url = 'http://localhost:3000/reset/'+token
         send_mail(
             subject='Reset your password',
-            message="Click <a href='%s'>here</a> to reset your password" % url,
+            message='Click <a href="%s">here</a> to reset your password' % url,
             from_email='from@example.com',
             recipient_list=[email]
         )
@@ -138,3 +140,52 @@ class ResetAPIView(APIView):
             'message': 'success'
         })
 
+
+class GoogleAuthAPIView(APIView):
+    def post(self, request):
+        token = request.data.get('token')
+
+        if not token:
+            raise exceptions.AuthenticationFailed('Token not provided')
+
+        try:
+            googleUser = id_token.verify_oauth2_token(
+                token,
+                Request(),
+                "9816983038-gs6t478e6vo67af9p4askcdsf4qctomv.apps.googleusercontent.com"
+            )
+        except ValueError as e:
+            raise exceptions.AuthenticationFailed('Invalid Google token')
+
+        if not googleUser or 'email' not in googleUser:
+            raise exceptions.AuthenticationFailed('Failed to retrieve user info from Google')
+
+        email = googleUser['email']
+        first_name = googleUser.get('given_name', '')
+        last_name = googleUser.get('family_name', '')
+
+        user = User.objects.filter(email=email).first()
+
+        if not user:
+            user = User.objects.create(
+                first_name=first_name,
+                last_name=last_name,
+                email=email
+            )
+            user.set_password(token)
+            user.save()
+
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+
+        UserToken.objects.create(
+            user_id=user.id,
+            token=refresh_token,
+            expired_at=datetime.datetime.utcnow() + datetime.timedelta(days=7),
+        )
+
+        response = Response({
+            'token': access_token  # ✅ Return JSON with token here!
+        })
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+        return response

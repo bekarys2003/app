@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import RegisterAPIView, LoginAPIView, UserAPIView, RefreshAPIView, LogoutAPIView, ForgotAPIView, ResetAPIView
+from .views import RegisterAPIView, LoginAPIView, UserAPIView, RefreshAPIView, LogoutAPIView, ForgotAPIView, ResetAPIView, GoogleAuthAPIView
 
 
 urlpatterns = [
@@ -10,5 +10,6 @@ urlpatterns = [
     path('logout', LogoutAPIView.as_view()),
     path('forgot', ForgotAPIView.as_view()),
     path('reset', ResetAPIView.as_view()),
+    path('google-auth', GoogleAuthAPIView.as_view()),
 
 ]
