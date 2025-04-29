@@ -15,13 +15,12 @@ function App() {
   return <BrowserRouter>
   <Nav/>
     <Routes>
-      <Route path='/' element={<Home/>} />
+      {/* <Route path='/' element={<Home/>} /> */}
       <Route path='/login' element={<Login/>} />
       <Route path='/register' element={<Register/>} />
       <Route path='/forgot' element={<Forgot/>} />
       <Route path='/reset/:token' element={<Reset/>} />
-      <Route path="/add-job" element={<AddJob />} />
-      <Route path="/jobs" element={<JobList />} />
+      <Route path="/" element={<JobList />} />
 
     </Routes>
   </BrowserRouter>

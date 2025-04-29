@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { AddJob } from "./JobAdd";
 type Job = {
     id: number;
     company_name: string;
@@ -12,21 +12,23 @@ type Job = {
 };
 
 export const JobList = () => {
-    const [jobs, setJobs] = useState<Job[]>([]);  // ✅ array
+    const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const fetchJobs = async () => {
+        try {
+            const { data } = await axios.get<Job[]>('jobs');
+            setJobs(data);
+        } catch (error) {
+            console.error('Failed to fetch jobs:', error);
+            setJobs([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        (async () => {
-            try {
-                const { data } = await axios.get<Job[]>('jobs');
-                setJobs(data);
-            } catch (error) {
-                console.error('Failed to fetch jobs:', error);
-                setJobs([]); // ← also important on error
-            } finally {
-                setLoading(false);
-            }
-        })();
+        fetchJobs();
     }, []);
 
     if (loading) {
@@ -39,6 +41,22 @@ export const JobList = () => {
 
     return (
         <div className="container mt-5">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2>Your Job Applications</h2>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => setShowAddForm(!showAddForm)} // 🔥 toggle form
+                >
+                    {showAddForm ? 'Close Form' : 'Add New Job'}
+                </button>
+            </div>
+
+            {showAddForm && (
+                <div className="mb-5">
+                    <AddJob onJobAdded={fetchJobs}/>
+                </div>
+            )}
+
             <h2>Your Job Applications</h2>
 
             {jobs.length === 0 ? (  // ✅ now jobs is always array
