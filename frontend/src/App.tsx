@@ -8,6 +8,7 @@ import { Home } from './components/Home';
 import './interceptors/axios';
 import { Forgot } from './components/Forgot';
 import { Reset } from './components/Reset';
+import { AddJob } from './components/JobAdd';
 
 function App() {
   return <BrowserRouter>
@@ -18,6 +19,7 @@ function App() {
       <Route path='/register' element={<Register/>} />
       <Route path='/forgot' element={<Forgot/>} />
       <Route path='/reset/:token' element={<Reset/>} />
+      <Route path="/add-job" element={<AddJob />} />
     </Routes>
   </BrowserRouter>
 }

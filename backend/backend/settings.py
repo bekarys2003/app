@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'accaunts',
+    'jobs',
 ]
 
 CORS_ALLOWED_ORIGINS = [
