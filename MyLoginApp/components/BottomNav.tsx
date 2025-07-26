@@ -1,23 +1,45 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, usePathname } from "expo-router";
+
+const ACTIVE_COLOR = "#F56060";
+const INACTIVE_COLOR = "#000";
 
 export default function BottomNav() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const tabs = [
+    { name: "Home", icon: "home", path: "/" },
+    { name: "Browse", icon: "search", path: "/browse" },
+    { name: "Cart", icon: "cart", path: "/reserves" },
+    { name: "Profile", icon: "person", path: "/profile" },
+  ];
 
   return (
     <View style={styles.bottomNav}>
-      <TouchableOpacity onPress={() => router.push("/")}>
-        <Ionicons name="home" size={24} color="#000" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push("/browse")}>
-        <Ionicons name="search" size={24} color="#000" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push("/reserves")}>
-        <Ionicons name="cart" size={24} color="#000" />
-      </TouchableOpacity>
-      <Ionicons name="person" size={24} color="#000" />
+      {tabs.map((tab, index) => {
+        const isActive = pathname === tab.path;
+        return (
+          <TouchableOpacity
+            key={index}
+            style={styles.iconButton}
+            onPress={() => router.push(tab.path)}
+          >
+            <View style={styles.iconWrapper}>
+              <Ionicons
+                name={tab.icon}
+                size={24}
+                color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
+              />
+              <Text style={[styles.label, { color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR }]}>
+                {tab.name}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
@@ -26,11 +48,23 @@ const styles = StyleSheet.create({
   bottomNav: {
     flexDirection: "row",
     justifyContent: "space-around",
-    alignItems: "center",
-    paddingVertical: 12,
+    alignItems: "flex-end",
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",
-    marginBottom: 25,
+    marginBottom: 20,
+  },
+  iconButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+  },
+  iconWrapper: {
+    alignItems: "center",
+  },
+  label: {
+    fontSize: 12,
+    marginTop: 2,
   },
 });

@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet, Image } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from "react-native";
 
+import { useRouter } from "expo-router";
 type CardProps = {
   title: string;
   address: string;
@@ -13,18 +14,20 @@ type CardListProps = {
   cards: CardProps[];
 };
 
+const router = useRouter();
+
 export default function CardList({ sectionTitle, cards }: CardListProps) {
   return (
     <View>
       <Text style={styles.sectionTitle}>{sectionTitle}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 16 }}>
         {cards.map((card, index) => (
-          <View key={index} style={styles.card}>
+          <TouchableOpacity key={index} style={styles.card} onPress={() => router.push("/modal/itemDetail")}>
             <Image source={card.image} style={styles.cardImage} />
             <Text style={styles.cardTitle}>{card.title}</Text>
             <Text style={styles.cardSubtitle}>{card.address}</Text>
             <Text style={styles.cardSubtitle}>{card.time}</Text>
-          </View>
+        </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
