@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, usePathname } from "expo-router";
+import * as Haptics from "expo-haptics";
 
 const ACTIVE_COLOR = "#F56060";
 const INACTIVE_COLOR = "#000";
@@ -25,7 +26,9 @@ export default function BottomNav() {
           <TouchableOpacity
             key={index}
             style={styles.iconButton}
-            onPress={() => router.push(tab.path)}
+            onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push(tab.path)}}
           >
             <View style={styles.iconWrapper}>
               <Ionicons

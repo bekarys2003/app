@@ -1,12 +1,13 @@
 import React from "react";
 import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from "react-native";
-
 import { useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
+
 type CardProps = {
   title: string;
   address: string;
   time: string;
-  image: any; // require(...)
+  image: any; // local require(...)
 };
 
 type CardListProps = {
@@ -14,20 +15,29 @@ type CardListProps = {
   cards: CardProps[];
 };
 
-const router = useRouter();
-
 export default function CardList({ sectionTitle, cards }: CardListProps) {
+  const router = useRouter();
+
+  const handleCardPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/modal/itemDetail");
+  };
+
   return (
     <View>
       <Text style={styles.sectionTitle}>{sectionTitle}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 16 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingLeft: 16 }}
+      >
         {cards.map((card, index) => (
-          <TouchableOpacity key={index} style={styles.card} onPress={() => router.push("/modal/itemDetail")}>
+          <TouchableOpacity key={index} style={styles.card} onPress={handleCardPress}>
             <Image source={card.image} style={styles.cardImage} />
             <Text style={styles.cardTitle}>{card.title}</Text>
             <Text style={styles.cardSubtitle}>{card.address}</Text>
             <Text style={styles.cardSubtitle}>{card.time}</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>

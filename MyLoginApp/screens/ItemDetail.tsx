@@ -12,6 +12,8 @@ import Animated, {
   runOnJS,
   useAnimatedReaction,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
+
 
 const HEADER_HEIGHT = 220;
 const screenHeight = Dimensions.get("window").height;
@@ -38,6 +40,7 @@ export default function ItemDetail() {
   const goBackAnimated = () => {
     if (hasNavigated.current) return;
     hasNavigated.current = true;
+    runOnJS(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium))();
 
     translateY.value = withTiming(screenHeight, { duration: 200 }, (finished) => {
       if (finished) {
@@ -61,7 +64,7 @@ export default function ItemDetail() {
   }));
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0], [1.5, 1], "clamp");
+    const scale = interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0], [1.9, 1], "clamp");
     const translateY = interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0], [-HEADER_HEIGHT / 2, 0], "clamp");
     return {
       transform: [{ scale }, { translateY }],
@@ -84,16 +87,35 @@ export default function ItemDetail() {
           style={[styles.image, imageAnimatedStyle]}
         />
 
-        <View style={styles.content}>
-          <Text style={styles.title}>Freshslice Pizza - 610 6th Street</Text>
-          <Text style={styles.rating}>⭐️⭐️⭐️⭐️⭐️ (450 Ratings)</Text>
-          <Text style={styles.address}>📍 13398 104 Ave, Surrey, BC</Text>
-          <Text style={styles.time}>🕒 Collect: 10:00 - 17:00</Text>
-          <Text style={styles.heading}>What You Can Get</Text>
-          <Text style={styles.text}>
-            Your bag may contain a variety of delicious pizza slices the store has left over from the day to enjoy.
-          </Text>
+      <View style={styles.content}>
+        <Text style={styles.title}>Freshslice Pizza - 610 6th Street</Text>
+
+        <View style={styles.ratingRow}>
+          <View style={styles.stars}>
+            {[...Array(5)].map((_, index) => (
+              <Ionicons key={index} name="star" size={18} color="#FFD700" style={styles.starIcon} />
+            ))}
+          </View>
+          <Text style={styles.ratingText}>4.9</Text>
+          <Text style={styles.ratingSubText}> (450 ratings)</Text>
         </View>
+
+        <View style={styles.infoRow}>
+          <Ionicons name="location-outline" size={18} color="#555" />
+          <Text style={styles.infoText}>13398 104 Ave, Surrey, BC</Text>
+        </View>
+
+        <View style={styles.infoRow}>
+          <Ionicons name="time-outline" size={18} color="#555" />
+          <Text style={styles.infoText}>Collect: 10:00 - 17:00</Text>
+        </View>
+
+        <Text style={styles.heading}>What You Can Get</Text>
+        <Text style={styles.text}>
+          Your bag may contain a variety of delicious pizza slices the store has left over from the day to enjoy.
+        </Text>
+      </View>
+
       </Animated.ScrollView>
 
       <TouchableOpacity style={styles.reserveButton}>
@@ -105,6 +127,12 @@ export default function ItemDetail() {
 
 
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+
   fullscreen: {
     position: "absolute",
     top: 0,
@@ -121,8 +149,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: HEADER_HEIGHT,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
   },
   content: {
     padding: 20,
@@ -143,15 +169,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 15,
   },
-  heading: {
-    fontWeight: "bold",
-    fontSize: 16,
-    marginTop: 10,
-  },
-  text: {
-    fontSize: 14,
-    marginTop: 6,
-  },
+
   reserveButton: {
     position: "absolute",
     bottom: 20,
@@ -167,4 +185,63 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  subTitle: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 2,
+  },
+
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+
+  infoText: {
+    fontSize: 14,
+    color: "#444",
+    marginLeft: 6,
+  },
+
+  heading: {
+    fontSize: 17,
+    fontWeight: "600",
+    marginTop: 20,
+    marginBottom: 6,
+  },
+
+  text: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#333",
+  },
+  stars: {
+    flexDirection: "row",
+    marginRight: 8,
+  },
+
+  starIcon: {
+    marginRight: 2,
+  },
+
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 4,
+  },
+
+  ratingText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+  },
+
+  ratingSubText: {
+    fontSize: 14,
+    color: "#666",
+    marginLeft: 4,
+  },
+
+
 });

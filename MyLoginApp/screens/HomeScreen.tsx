@@ -4,6 +4,8 @@ import SearchBar from "../components/SearchBar";
 import CategoryFilters from "../components/CategoryFilters";
 import BottomNav from "../components/BottomNav";
 import CardList from "../components/CardList";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 
 export default function HomeScreen() {
   const deals = [
@@ -36,13 +38,18 @@ export default function HomeScreen() {
     },
   ];
 
+  const handleCardPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push("/item-detail");
+  };
+
   return (
     <View style={styles.container}>
       <SearchBar />
       <CategoryFilters />
       <ScrollView style={{ flex: 1 }}>
-        <CardList sectionTitle="Deals for You" cards={deals} />
-        <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} />
+        <CardList sectionTitle="Deals for You" cards={deals} onCardPress={handleCardPress} />
+        <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} onCardPress={handleCardPress} />
       </ScrollView>
       <BottomNav />
     </View>
