@@ -4,10 +4,13 @@ import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import TransitionWrapper from "../../components/TransitionWrapper";
 import HomeScreen from "./index"; // Home tab screen
 import BrowseScreen from "./browse"; // Browse tab screen
+import ReservesScreen from "./reserves"; // Cart tab screen
+
+type Tab = "home" | "browse" | "reserves";
 
 type Params = {
-  target: "home" | "browse";
-  from?: "home" | "browse";
+  target: Tab;
+  from?: Tab;
 };
 
 export default function TransitionScreen() {
@@ -15,19 +18,16 @@ export default function TransitionScreen() {
   const pathname = usePathname();
   const { target, from } = useLocalSearchParams<Params>();
 
-  const [current] = useState<"home" | "browse">(() => {
-    if (from === "browse") return "browse";
-    if (from === "home") return "home";
+  const [current] = useState<Tab>(() => {
+    if (from === "browse" || from === "home" || from === "reserves") return from;
     if (pathname.includes("browse")) return "browse";
+    if (pathname.includes("reserves")) return "reserves";
     return "home";
   });
 
+  const pages: Tab[] = ["home", "browse", "reserves"];
   const direction: "left" | "right" =
-    current === "home" && target === "browse"
-      ? "left"
-      : current === "browse" && target === "home"
-      ? "right"
-      : "left";
+    pages.indexOf(target) > pages.indexOf(current) ? "left" : "right";
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -43,8 +43,10 @@ export default function TransitionScreen() {
       <TransitionWrapper direction={direction} isEntering={false}>
         {current === "home" ? (
           <HomeScreen skipAnimation />
-        ) : (
+        ) : current === "browse" ? (
           <BrowseScreen skipAnimation />
+        ) : (
+          <ReservesScreen skipAnimation />
         )}
       </TransitionWrapper>
 
@@ -52,8 +54,10 @@ export default function TransitionScreen() {
       <TransitionWrapper direction={direction} isEntering>
         {target === "home" ? (
           <HomeScreen skipAnimation />
-        ) : (
+        ) : target === "browse" ? (
           <BrowseScreen skipAnimation />
+        ) : (
+          <ReservesScreen skipAnimation />
         )}
       </TransitionWrapper>
     </View>

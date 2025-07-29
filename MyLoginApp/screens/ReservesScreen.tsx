@@ -10,7 +10,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import BottomNav from "../components/BottomNav";
 
-export default function ReservesScreen() {
+type Props = {
+    skipAnimation?: boolean;
+  };
+
+export default function ReservesScreen({ skipAnimation }: Props) {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
