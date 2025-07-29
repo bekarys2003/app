@@ -12,23 +12,28 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   const tabs = [
-    { name: "Home", icon: "home", path: "/" },
-    { name: "Browse", icon: "search", path: "/browse" },
-    { name: "Cart", icon: "cart", path: "/reserves" },
-    { name: "Profile", icon: "person", path: "/profile" },
+    { name: "Home", icon: "home", target: "home", path: "/(tabs)" },
+    { name: "Browse", icon: "search", target: "browse", path: "/(tabs)/browse" },
+    { name: "Cart", icon: "cart", target: "reserves", path: "/(tabs)/reserves" },
+    { name: "Profile", icon: "person", target: "profile", path: "/(tabs)/profile" },
   ];
 
   return (
     <View style={styles.bottomNav}>
       {tabs.map((tab, index) => {
         const isActive = pathname === tab.path;
+
         return (
           <TouchableOpacity
             key={index}
             style={styles.iconButton}
             onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                router.push(tab.path)}}
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              router.push({
+                pathname: "/transition-screen",
+                params: { target: tab.target },
+              });
+            }}
           >
             <View style={styles.iconWrapper}>
               <Ionicons

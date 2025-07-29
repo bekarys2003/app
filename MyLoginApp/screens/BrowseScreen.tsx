@@ -1,13 +1,52 @@
-// screens/BrowseScreen.tsx
-import React from "react";
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from "react-native";
+import React, { useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import Animated, {
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+  runOnUI,
+} from "react-native-reanimated";
+import { useLocalSearchParams } from "expo-router";
+
 import SearchBar from "../components/SearchBar";
 import CategoryFilters from "../components/CategoryFilters";
 import BottomNav from "../components/BottomNav";
 
-export default function BrowseScreen() {
+const screenWidth = Dimensions.get("window").width;
+
+type Props = {
+  skipAnimation?: boolean;
+};
+
+export default function BrowseScreen({ skipAnimation }: Props) {
+  const translateX = useSharedValue(0);
+  const { fromNav } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (skipAnimation) return;
+
+    if (fromNav === "true") {
+      runOnUI(() => {
+        translateX.value = screenWidth; // Start off-screen right
+        translateX.value = withTiming(0, { duration: 250 }); // Slide in to center
+      })();
+    }
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, animatedStyle]}>
       <SearchBar />
       <CategoryFilters />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -30,7 +69,7 @@ export default function BrowseScreen() {
         </TouchableOpacity>
       </ScrollView>
       <BottomNav />
-    </View>
+    </Animated.View>
   );
 }
 
