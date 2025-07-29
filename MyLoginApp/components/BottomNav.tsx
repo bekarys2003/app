@@ -11,6 +11,10 @@ export default function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const currentTab: "home" | "browse" = pathname.includes("browse")
+    ? "browse"
+    : "home";
+
   const tabs = [
     { name: "Home", icon: "home", target: "home", path: "/(tabs)" },
     { name: "Browse", icon: "search", target: "browse", path: "/(tabs)/browse" },
@@ -31,7 +35,7 @@ export default function BottomNav() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               router.push({
                 pathname: "/transition-screen",
-                params: { target: tab.target },
+                params: { target: tab.target, from: currentTab },
               });
             }}
           >
