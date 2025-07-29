@@ -11,8 +11,10 @@ export default function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const currentTab: "home" | "browse" = pathname.includes("browse")
+  const currentTab: "home" | "browse" | "reserves" = pathname.includes("browse")
     ? "browse"
+    : pathname.includes("reserves")
+    ? "reserves"
     : "home";
 
   const tabs = [
