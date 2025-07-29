@@ -7,14 +7,17 @@ import BrowseScreen from "../app/(tabs)/browse"; // Browse tab screen
 
 type Params = {
   target: "home" | "browse";
+  from?: "home" | "browse";
 };
 
 export default function TransitionScreen() {
   const router = useRouter();
   const pathname = usePathname();
-  const { target } = useLocalSearchParams<Params>();
+  const { target, from } = useLocalSearchParams<Params>();
 
   const [current] = useState<"home" | "browse">(() => {
+    if (from === "browse") return "browse";
+    if (from === "home") return "home";
     if (pathname.includes("browse")) return "browse";
     return "home";
   });
@@ -28,7 +31,8 @@ export default function TransitionScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace("/(tabs)/" + target);
+      const path = target === "home" ? "/(tabs)" : "/(tabs)/" + target;
+      router.replace(path);
     }, 300);
     return () => clearTimeout(timer);
   }, [target]);
