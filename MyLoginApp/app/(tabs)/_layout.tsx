@@ -23,7 +23,7 @@ export default function TabsLayout() {
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {showHeader && (
-        <View style={{ paddingTop: 50 }}>
+        <View style={{ paddingTop: 50, zIndex: 1 }}>
           <SearchBar />
           <CategoryFilters />
         </View>
