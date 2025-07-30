@@ -16,11 +16,13 @@ import Animated, {
 const screenWidth = Dimensions.get("window").width;
 
 type Props = {
-    skipAnimation?: boolean;
-  };
+  skipAnimation?: boolean;
+  hideHeader?: boolean;
+  hideNav?: boolean;
+};
 
 
-export default function HomeScreen({ skipAnimation }: Props) {
+export default function HomeScreen({ skipAnimation, hideHeader, hideNav }: Props) {
 
   const translateX = useSharedValue(0);
   const { fromNav } = useLocalSearchParams();
@@ -77,13 +79,17 @@ export default function HomeScreen({ skipAnimation }: Props) {
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
-      <SearchBar />
-      <CategoryFilters />
+      {!hideHeader && (
+        <>
+          <SearchBar />
+          <CategoryFilters />
+        </>
+      )}
       <ScrollView style={{ flex: 1 }}>
         <CardList sectionTitle="Deals for You" cards={deals} onCardPress={handleCardPress} />
         <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} onCardPress={handleCardPress} />
       </ScrollView>
-      <BottomNav />
+      {!hideNav && <BottomNav />}
     </Animated.View>
   );
 }

@@ -24,9 +24,11 @@ const screenWidth = Dimensions.get("window").width;
 
 type Props = {
   skipAnimation?: boolean;
+  hideHeader?: boolean;
+  hideNav?: boolean;
 };
 
-export default function BrowseScreen({ skipAnimation }: Props) {
+export default function BrowseScreen({ skipAnimation, hideHeader, hideNav }: Props) {
   const translateX = useSharedValue(0);
   const { fromNav } = useLocalSearchParams();
 
@@ -47,8 +49,12 @@ export default function BrowseScreen({ skipAnimation }: Props) {
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
-      <SearchBar />
-      <CategoryFilters />
+      {!hideHeader && (
+        <>
+          <SearchBar />
+          <CategoryFilters />
+        </>
+      )}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.browseTitle}>Browse</Text>
 
@@ -68,7 +74,7 @@ export default function BrowseScreen({ skipAnimation }: Props) {
           <Text style={styles.browseLabel}>Fast Food</Text>
         </TouchableOpacity>
       </ScrollView>
-      <BottomNav />
+      {!hideNav && <BottomNav />}
     </Animated.View>
   );
 }
