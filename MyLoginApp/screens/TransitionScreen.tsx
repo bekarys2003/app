@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
+import SearchBar from "../components/SearchBar";
+import CategoryFilters from "../components/CategoryFilters";
+import BottomNav from "../components/BottomNav";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import TransitionWrapper from "../components/TransitionWrapper";
 import HomeScreen from "../app/(tabs)/index"; // Home tab screen
@@ -29,6 +32,8 @@ export default function TransitionScreen() {
   const direction: "left" | "right" =
     pages.indexOf(target) > pages.indexOf(current) ? "left" : "right";
 
+  const showHeader = current !== "reserves" && target !== "reserves";
+
   useEffect(() => {
     const timer = setTimeout(() => {
       const path = target === "home" ? "/(tabs)" : "/(tabs)/" + target;
@@ -39,27 +44,36 @@ export default function TransitionScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {showHeader && (
+        <View style={{ paddingTop: 50 }}>
+          <SearchBar />
+          <CategoryFilters />
+        </View>
+      )}
+
       {/* Exit current screen */}
       <TransitionWrapper direction={direction} isEntering={false}>
         {current === "home" ? (
-          <HomeScreen skipAnimation />
+          <HomeScreen skipAnimation hideHeader hideNav />
         ) : current === "browse" ? (
-          <BrowseScreen skipAnimation />
+          <BrowseScreen skipAnimation hideHeader hideNav />
         ) : (
-          <ReservesScreen skipAnimation />
+          <ReservesScreen skipAnimation hideNav />
         )}
       </TransitionWrapper>
 
       {/* Enter new screen */}
       <TransitionWrapper direction={direction} isEntering>
         {target === "home" ? (
-          <HomeScreen skipAnimation />
+          <HomeScreen skipAnimation hideHeader hideNav />
         ) : target === "browse" ? (
-          <BrowseScreen skipAnimation />
+          <BrowseScreen skipAnimation hideHeader hideNav />
         ) : (
-          <ReservesScreen skipAnimation />
+          <ReservesScreen skipAnimation hideNav />
         )}
       </TransitionWrapper>
+
+      <BottomNav />
     </View>
   );
 }

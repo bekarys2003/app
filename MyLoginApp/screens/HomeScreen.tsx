@@ -78,7 +78,14 @@ export default function HomeScreen({ skipAnimation, hideHeader, hideNav }: Props
   };
 
   return (
-    <Animated.View style={[styles.container, animatedStyle]}>
+    <Animated.View
+      style={[
+        styles.container,
+        animatedStyle,
+        hideHeader && { paddingTop: 0 },
+        hideNav && { paddingBottom: 0 },
+      ]}
+    >
       {!hideHeader && (
         <>
           <SearchBar />
@@ -99,5 +106,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingTop: 50,
+    paddingBottom: 70,
   },
 });
