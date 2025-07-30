@@ -68,7 +68,7 @@ export default function HomeScreen({ skipAnimation }: Props) {
 
 
   return (
-
+    <View style={styles.container}>
       <Animated.View style={[animatedStyle, { flex: 1 }]}>
         <ScrollView style={{ flex: 1 }}>
         <CardList sectionTitle="Deals for You" cards={deals} />

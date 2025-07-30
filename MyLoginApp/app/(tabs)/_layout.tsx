@@ -1,9 +1,9 @@
 import React from "react";
 import { View } from "react-native";
 import { Slot, usePathname, useLocalSearchParams } from "expo-router";
-import SearchBar from "../components/SearchBar";
-import CategoryFilters from "../components/CategoryFilters";
-import BottomNav from "../components/BottomNav";
+import SearchBar from "../../components/SearchBar";
+import CategoryFilters from "../../components/CategoryFilters";
+import BottomNav from "../../components/BottomNav";
 
 export default function TabsLayout() {
   const pathname = usePathname();
@@ -21,7 +21,7 @@ export default function TabsLayout() {
   const showNav = !pathname.includes("modal");
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {showHeader && (
         <View style={{ paddingTop: 50 }}>
           <SearchBar />
