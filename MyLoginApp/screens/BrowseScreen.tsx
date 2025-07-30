@@ -43,7 +43,7 @@ export default function BrowseScreen({ skipAnimation }: Props) {
   }));
 
   return (
-    <View style={styles.container}>
+
       <Animated.View style={[animatedStyle, styles.content]}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={styles.browseTitle}>Browse</Text>
@@ -65,6 +65,7 @@ export default function BrowseScreen({ skipAnimation }: Props) {
           </TouchableOpacity>
         </ScrollView>
       </Animated.View>
+
     </View>
   );
 }
