@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 
@@ -33,7 +33,7 @@ export default function CardList({ sectionTitle, cards }: CardListProps) {
       >
         {cards.map((card, index) => (
           <TouchableOpacity key={index} style={styles.card} onPress={handleCardPress}>
-            <Image source={card.image} style={styles.cardImage} />
+            <Image source={card.image} style={styles.cardImage}/>
             <Text style={styles.cardTitle}>{card.title}</Text>
             <Text style={styles.cardSubtitle}>{card.address}</Text>
             <Text style={styles.cardSubtitle}>{card.time}</Text>

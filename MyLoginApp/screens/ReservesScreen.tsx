@@ -5,7 +5,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Image,
+  Image
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BottomNav from "../components/BottomNav";

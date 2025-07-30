@@ -15,6 +15,8 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
+
+
 const HEADER_HEIGHT = 220;
 const screenHeight = Dimensions.get("window").height;
 
