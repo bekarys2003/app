@@ -60,6 +60,10 @@ export default function BottomNav() {
 
 const styles = StyleSheet.create({
   bottomNav: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "flex-end",
@@ -67,7 +71,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",
-    marginBottom: 20,
   },
   iconButton: {
     alignItems: "center",

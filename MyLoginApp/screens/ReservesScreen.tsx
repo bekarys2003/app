@@ -17,7 +17,10 @@ type Props = {
 
 export default function ReservesScreen({ skipAnimation, hideNav }: Props) {
   return (
-    <View style={styles.container}>
+    <View style={[
+      styles.container,
+      hideNav && { paddingBottom: 0 },
+    ]}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Reserves</Text>
 
@@ -82,6 +85,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingTop: 50,
+    paddingBottom: 70,
   },
   content: {
     flex: 1,
