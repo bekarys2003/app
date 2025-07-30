@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
-import { ScrollView, StyleSheet, Dimensions } from "react-native";
+import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
 import SearchBar from "../components/SearchBar";
 import CategoryFilters from "../components/CategoryFilters";
 import BottomNav from "../components/BottomNav";
 import CardList from "../components/CardList";
-import * as Haptics from "expo-haptics";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -72,16 +71,11 @@ export default function HomeScreen({ skipAnimation, hideHeader, hideNav }: Props
     },
   ];
 
-  const handleCardPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/item-detail");
-  };
 
   return (
-    <Animated.View
+    <View
       style={[
         styles.container,
-        animatedStyle,
         hideHeader && { paddingTop: 0 },
         hideNav && { paddingBottom: 0 },
       ]}
@@ -92,12 +86,14 @@ export default function HomeScreen({ skipAnimation, hideHeader, hideNav }: Props
           <CategoryFilters />
         </>
       )}
-      <ScrollView style={{ flex: 1 }}>
-        <CardList sectionTitle="Deals for You" cards={deals} onCardPress={handleCardPress} />
-        <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} onCardPress={handleCardPress} />
-      </ScrollView>
+      <Animated.View style={[animatedStyle, { flex: 1 }]}>
+        <ScrollView style={{ flex: 1 }}>
+        <CardList sectionTitle="Deals for You" cards={deals} />
+        <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} />
+        </ScrollView>
+      </Animated.View>
       {!hideNav && <BottomNav />}
-    </Animated.View>
+    </View>
   );
 }
 
