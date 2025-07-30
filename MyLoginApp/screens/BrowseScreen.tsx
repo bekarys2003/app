@@ -16,19 +16,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { useLocalSearchParams } from "expo-router";
 
-import SearchBar from "../components/SearchBar";
-import CategoryFilters from "../components/CategoryFilters";
-import BottomNav from "../components/BottomNav";
 
 const screenWidth = Dimensions.get("window").width;
 
 type Props = {
   skipAnimation?: boolean;
-  hideHeader?: boolean;
-  hideNav?: boolean;
 };
 
-export default function BrowseScreen({ skipAnimation, hideHeader, hideNav }: Props) {
+export default function BrowseScreen({ skipAnimation }: Props) {
   const translateX = useSharedValue(0);
   const { fromNav } = useLocalSearchParams();
 
@@ -48,41 +43,29 @@ export default function BrowseScreen({ skipAnimation, hideHeader, hideNav }: Pro
   }));
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        animatedStyle,
-        hideHeader && { paddingTop: 0 },
-        hideNav && { paddingBottom: 0 },
-      ]}
-    >
-      {!hideHeader && (
-        <>
-          <SearchBar />
-          <CategoryFilters />
-        </>
-      )}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.browseTitle}>Browse</Text>
+    <View style={styles.container}>
+      <Animated.View style={[animatedStyle, styles.content]}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Text style={styles.browseTitle}>Browse</Text>
 
-        <TouchableOpacity activeOpacity={0.8} style={styles.cardWrapper}>
-          <Image
-            source={require("../assets/images/pexels-athena-2180877.jpg")}
-            style={styles.browseImage}
-          />
-          <Text style={styles.browseLabel}>Bakery & Pastries</Text>
-        </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.8} style={styles.cardWrapper}>
+            <Image
+              source={require("../assets/images/pexels-athena-2180877.jpg")}
+              style={styles.browseImage}
+            />
+            <Text style={styles.browseLabel}>Bakery & Pastries</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity activeOpacity={0.8} style={styles.cardWrapper}>
-          <Image
-            source={require("../assets/images/pexels-ikeen-james-1194926-2274787.jpg")}
-            style={styles.browseImage}
-          />
-          <Text style={styles.browseLabel}>Fast Food</Text>
-        </TouchableOpacity>
-      </ScrollView>
-      {!hideNav && <BottomNav />}
-    </Animated.View>
+          <TouchableOpacity activeOpacity={0.8} style={styles.cardWrapper}>
+            <Image
+              source={require("../assets/images/pexels-ikeen-james-1194926-2274787.jpg")}
+              style={styles.browseImage}
+            />
+            <Text style={styles.browseLabel}>Fast Food</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </Animated.View>
+    </View>
   );
 }
 
@@ -90,7 +73,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50,
     paddingBottom: 70,
   },
   content: {

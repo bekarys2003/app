@@ -8,19 +8,14 @@ import {
   Image
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import BottomNav from "../components/BottomNav";
 
 type Props = {
   skipAnimation?: boolean;
-  hideNav?: boolean;
 };
 
-export default function ReservesScreen({ skipAnimation, hideNav }: Props) {
+export default function ReservesScreen({ skipAnimation }: Props) {
   return (
-    <View style={[
-      styles.container,
-      hideNav && { paddingBottom: 0 },
-    ]}>
+    <View style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Reserves</Text>
 
@@ -75,7 +70,6 @@ export default function ReservesScreen({ skipAnimation, hideNav }: Props) {
         </ScrollView>
       </ScrollView>
 
-      {!hideNav && <BottomNav />}
     </View>
   );
 }
@@ -84,7 +78,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50,
     paddingBottom: 70,
   },
   content: {

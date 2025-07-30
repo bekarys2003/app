@@ -1,11 +1,7 @@
 import React, { useEffect } from "react";
-import { ScrollView, StyleSheet, Dimensions } from "react-native";
-import SearchBar from "../components/SearchBar";
-import CategoryFilters from "../components/CategoryFilters";
-import BottomNav from "../components/BottomNav";
+import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
 import CardList from "../components/CardList";
-import * as Haptics from "expo-haptics";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -17,12 +13,10 @@ const screenWidth = Dimensions.get("window").width;
 
 type Props = {
   skipAnimation?: boolean;
-  hideHeader?: boolean;
-  hideNav?: boolean;
 };
 
 
-export default function HomeScreen({ skipAnimation, hideHeader, hideNav }: Props) {
+export default function HomeScreen({ skipAnimation }: Props) {
 
   const translateX = useSharedValue(0);
   const { fromNav } = useLocalSearchParams();
@@ -72,32 +66,16 @@ export default function HomeScreen({ skipAnimation, hideHeader, hideNav }: Props
     },
   ];
 
-  const handleCardPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/item-detail");
-  };
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        animatedStyle,
-        hideHeader && { paddingTop: 0 },
-        hideNav && { paddingBottom: 0 },
-      ]}
-    >
-      {!hideHeader && (
-        <>
-          <SearchBar />
-          <CategoryFilters />
-        </>
-      )}
-      <ScrollView style={{ flex: 1 }}>
-        <CardList sectionTitle="Deals for You" cards={deals} onCardPress={handleCardPress} />
-        <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} onCardPress={handleCardPress} />
-      </ScrollView>
-      {!hideNav && <BottomNav />}
-    </Animated.View>
+    <View style={styles.container}>
+      <Animated.View style={[animatedStyle, { flex: 1 }]}>
+        <ScrollView style={{ flex: 1 }}>
+        <CardList sectionTitle="Deals for You" cards={deals} />
+        <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} />
+        </ScrollView>
+      </Animated.View>
+    </View>
   );
 }
 
@@ -105,7 +83,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50,
     paddingBottom: 70,
   },
 });

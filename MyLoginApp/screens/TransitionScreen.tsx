@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
-import SearchBar from "../components/SearchBar";
-import CategoryFilters from "../components/CategoryFilters";
-import BottomNav from "../components/BottomNav";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import TransitionWrapper from "../components/TransitionWrapper";
 import HomeScreen from "../app/(tabs)/index"; // Home tab screen
@@ -32,7 +29,6 @@ export default function TransitionScreen() {
   const direction: "left" | "right" =
     pages.indexOf(target) > pages.indexOf(current) ? "left" : "right";
 
-  const showHeader = current !== "reserves" && target !== "reserves";
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -44,36 +40,28 @@ export default function TransitionScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      {showHeader && (
-        <View style={{ paddingTop: 50 }}>
-          <SearchBar />
-          <CategoryFilters />
-        </View>
-      )}
 
       {/* Exit current screen */}
       <TransitionWrapper direction={direction} isEntering={false}>
         {current === "home" ? (
-          <HomeScreen skipAnimation hideHeader hideNav />
+          <HomeScreen skipAnimation />
         ) : current === "browse" ? (
-          <BrowseScreen skipAnimation hideHeader hideNav />
+          <BrowseScreen skipAnimation />
         ) : (
-          <ReservesScreen skipAnimation hideNav />
+          <ReservesScreen skipAnimation />
         )}
       </TransitionWrapper>
 
       {/* Enter new screen */}
       <TransitionWrapper direction={direction} isEntering>
         {target === "home" ? (
-          <HomeScreen skipAnimation hideHeader hideNav />
+          <HomeScreen skipAnimation />
         ) : target === "browse" ? (
-          <BrowseScreen skipAnimation hideHeader hideNav />
+          <BrowseScreen skipAnimation />
         ) : (
-          <ReservesScreen skipAnimation hideNav />
+          <ReservesScreen skipAnimation />
         )}
       </TransitionWrapper>
-
-      <BottomNav />
     </View>
   );
 }
