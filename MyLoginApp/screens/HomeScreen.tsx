@@ -1,8 +1,5 @@
 import React, { useEffect } from "react";
 import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
-import SearchBar from "../components/SearchBar";
-import CategoryFilters from "../components/CategoryFilters";
-import BottomNav from "../components/BottomNav";
 import CardList from "../components/CardList";
 import { useLocalSearchParams } from "expo-router";
 import Animated, {
@@ -16,12 +13,10 @@ const screenWidth = Dimensions.get("window").width;
 
 type Props = {
   skipAnimation?: boolean;
-  hideHeader?: boolean;
-  hideNav?: boolean;
 };
 
 
-export default function HomeScreen({ skipAnimation, hideHeader, hideNav }: Props) {
+export default function HomeScreen({ skipAnimation }: Props) {
 
   const translateX = useSharedValue(0);
   const { fromNav } = useLocalSearchParams();
@@ -73,26 +68,14 @@ export default function HomeScreen({ skipAnimation, hideHeader, hideNav }: Props
 
 
   return (
-    <View
-      style={[
-        styles.container,
-        hideHeader && { paddingTop: 0 },
-        hideNav && { paddingBottom: 0 },
-      ]}
-    >
-      {!hideHeader && (
-        <>
-          <SearchBar />
-          <CategoryFilters />
-        </>
-      )}
+
       <Animated.View style={[animatedStyle, { flex: 1 }]}>
         <ScrollView style={{ flex: 1 }}>
         <CardList sectionTitle="Deals for You" cards={deals} />
         <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} />
         </ScrollView>
       </Animated.View>
-      {!hideNav && <BottomNav />}
+
     </View>
   );
 }
@@ -101,7 +84,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50,
     paddingBottom: 70,
   },
 });

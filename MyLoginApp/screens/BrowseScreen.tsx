@@ -16,19 +16,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { useLocalSearchParams } from "expo-router";
 
-import SearchBar from "../components/SearchBar";
-import CategoryFilters from "../components/CategoryFilters";
-import BottomNav from "../components/BottomNav";
 
 const screenWidth = Dimensions.get("window").width;
 
 type Props = {
   skipAnimation?: boolean;
-  hideHeader?: boolean;
-  hideNav?: boolean;
 };
 
-export default function BrowseScreen({ skipAnimation, hideHeader, hideNav }: Props) {
+export default function BrowseScreen({ skipAnimation }: Props) {
   const translateX = useSharedValue(0);
   const { fromNav } = useLocalSearchParams();
 
@@ -48,19 +43,7 @@ export default function BrowseScreen({ skipAnimation, hideHeader, hideNav }: Pro
   }));
 
   return (
-    <View
-      style={[
-        styles.container,
-        hideHeader && { paddingTop: 0 },
-        hideNav && { paddingBottom: 0 },
-      ]}
-    >
-      {!hideHeader && (
-        <>
-          <SearchBar />
-          <CategoryFilters />
-        </>
-      )}
+
       <Animated.View style={[animatedStyle, styles.content]}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={styles.browseTitle}>Browse</Text>
@@ -82,7 +65,7 @@ export default function BrowseScreen({ skipAnimation, hideHeader, hideNav }: Pro
           </TouchableOpacity>
         </ScrollView>
       </Animated.View>
-      {!hideNav && <BottomNav />}
+
     </View>
   );
 }
@@ -91,7 +74,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50,
     paddingBottom: 70,
   },
   content: {

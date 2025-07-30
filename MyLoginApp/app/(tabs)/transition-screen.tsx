@@ -5,9 +5,6 @@ import TransitionWrapper from "../../components/TransitionWrapper";
 import HomeScreen from "./index"; // Home tab screen
 import BrowseScreen from "./browse"; // Browse tab screen
 import ReservesScreen from "./reserves"; // Cart tab screen
-import BottomNav from "../../components/BottomNav";
-import SearchBar from "../../components/SearchBar";
-import CategoryFilters from "../../components/CategoryFilters";
 
 type Tab = "home" | "browse" | "reserves";
 
@@ -32,9 +29,6 @@ export default function TransitionScreen() {
   const direction: "left" | "right" =
     pages.indexOf(target) > pages.indexOf(current) ? "left" : "right";
 
-  const showHeader =
-    (current === "home" || current === "browse") &&
-    (target === "home" || target === "browse");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -46,36 +40,28 @@ export default function TransitionScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      {showHeader && (
-        <>
-          <SearchBar />
-          <CategoryFilters />
-        </>
-      )}
 
       {/* Exit current screen */}
       <TransitionWrapper direction={direction} isEntering={false}>
         {current === "home" ? (
-          <HomeScreen skipAnimation hideHeader hideNav />
+          <HomeScreen skipAnimation />
         ) : current === "browse" ? (
-          <BrowseScreen skipAnimation hideHeader hideNav />
+          <BrowseScreen skipAnimation />
         ) : (
-          <ReservesScreen skipAnimation hideNav />
+          <ReservesScreen skipAnimation />
         )}
       </TransitionWrapper>
 
       {/* Enter new screen */}
       <TransitionWrapper direction={direction} isEntering>
         {target === "home" ? (
-          <HomeScreen skipAnimation hideHeader hideNav />
+          <HomeScreen skipAnimation />
         ) : target === "browse" ? (
-          <BrowseScreen skipAnimation hideHeader hideNav />
+          <BrowseScreen skipAnimation />
         ) : (
-          <ReservesScreen skipAnimation hideNav />
+          <ReservesScreen skipAnimation />
         )}
       </TransitionWrapper>
-
-      <BottomNav />
     </View>
   );
 }
