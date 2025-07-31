@@ -1,5 +1,4 @@
-// screens/ReservesScreen.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -8,76 +7,111 @@ import {
   Image
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-type Props = {
-  skipAnimation?: boolean;
-};
+function ReservesScreen() {
+  useEffect(() => {
+    // Preload image assets to reduce rendering delay
+    const prefetchImages = [
+      require("../assets/images/pexels-ikeen-james-1194926-2274787.jpg"),
+      require("../assets/images/pexels-athena-2180877.jpg"),
+    ];
 
-export default function ReservesScreen({ skipAnimation }: Props) {
+    prefetchImages.forEach((img) => {
+      const uri = Image.resolveAssetSource(img).uri;
+      Image.prefetch(uri);
+    });
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionTitle}>Reserves</Text>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.container}>
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <Text style={styles.sectionTitle}>Reserves</Text>
 
-        <View style={styles.reserveCard}>
-          <View style={styles.reserveHeader}>
-            <Image
-              source={require("../assets/images/pexels-ikeen-james-1194926-2274787.jpg")}
-              style={styles.logoIcon}
-            />
-            <Text style={styles.reserveTitle}>Freshslice Pizza - 610 6th Street</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={18} color="#000" />
-            <Text style={styles.infoText}>13398 104 Ave, Surrey, BC</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="time-outline" size={18} color="#000" />
-            <Text style={styles.infoText}>Collect: Today 10:00 - 17:00</Text>
-          </View>
-        </View>
-
-        <View style={styles.reserveCard}>
-          <View style={styles.reserveHeader}>
-            <Image
-              source={require("../assets/images/pexels-ikeen-james-1194926-2274787.jpg")}
-              style={styles.logoIcon}
-            />
-            <Text style={styles.reserveTitle}>Cactus Club - 1244 Street</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={18} color="#000" />
-            <Text style={styles.infoText}>1244 4th Ave, Burnaby, BC</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="time-outline" size={18} color="#000" />
-            <Text style={styles.infoText}>Collect: Tomorrow 10:00 - 17:00</Text>
-          </View>
-        </View>
-
-        <Text style={styles.sectionTitle}>More Deals</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 16, paddingRight: 16 }}>
-          {[1, 2, 3].map((item, i) => (
-            <View key={i} style={styles.dealCard}>
+          <View
+            style={styles.reserveCard}
+            renderToHardwareTextureAndroid
+            shouldRasterizeIOS
+          >
+            <View style={styles.reserveHeader}>
               <Image
-                source={require("../assets/images/pexels-athena-2180877.jpg")}
-                style={styles.dealImage}
+                source={require("../assets/images/pexels-ikeen-james-1194926-2274787.jpg")}
+                style={styles.logoIcon}
+                resizeMode="cover"
               />
-              <Text style={styles.dealTitle}>Freshslice Pizza - 123 Street</Text>
-              <Text style={styles.dealTime}>Tomorrow 10:00 - 17:00</Text>
+              <Text style={styles.reserveTitle}>Freshslice Pizza - 610 6th Street</Text>
             </View>
-          ))}
-        </ScrollView>
-      </ScrollView>
+            <View style={styles.infoRow}>
+              <Ionicons name="location-outline" size={18} color="#000" />
+              <Text style={styles.infoText}>13398 104 Ave, Surrey, BC</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Ionicons name="time-outline" size={18} color="#000" />
+              <Text style={styles.infoText}>Collect: Today 10:00 - 17:00</Text>
+            </View>
+          </View>
 
-    </View>
+          <View
+            style={styles.reserveCard}
+            renderToHardwareTextureAndroid
+            shouldRasterizeIOS
+          >
+            <View style={styles.reserveHeader}>
+              <Image
+                source={require("../assets/images/pexels-ikeen-james-1194926-2274787.jpg")}
+                style={styles.logoIcon}
+                resizeMode="cover"
+              />
+              <Text style={styles.reserveTitle}>Cactus Club - 1244 Street</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Ionicons name="location-outline" size={18} color="#000" />
+              <Text style={styles.infoText}>1244 4th Ave, Burnaby, BC</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Ionicons name="time-outline" size={18} color="#000" />
+              <Text style={styles.infoText}>Collect: Tomorrow 10:00 - 17:00</Text>
+            </View>
+          </View>
+
+          <Text style={styles.sectionTitle}>More Deals</Text>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingLeft: 16, paddingRight: 16 }}
+          >
+            {[1, 2, 3].map((item, i) => (
+              <View
+                key={i}
+                style={styles.dealCard}
+                renderToHardwareTextureAndroid
+                shouldRasterizeIOS
+              >
+                <Image
+                  source={require("../assets/images/pexels-athena-2180877.jpg")}
+                  style={styles.dealImage}
+                  resizeMode="cover"
+                />
+                <Text style={styles.dealTitle}>Freshslice Pizza - 123 Street</Text>
+                <Text style={styles.dealTime}>Tomorrow 10:00 - 17:00</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  container: {
+    flex: 1,
     paddingBottom: 70,
   },
   content: {
@@ -143,3 +177,6 @@ const styles = StyleSheet.create({
     color: "gray",
   },
 });
+
+// Export memoized version to avoid re-renders
+export default React.memo(ReservesScreen);

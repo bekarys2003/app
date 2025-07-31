@@ -1,37 +1,36 @@
 import React from "react";
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons"; // switched
 
 const categories = [
-  { name: "grocery", icon: "shopping-basket" },
-  { name: "fast food", icon: "fastfood" },
-  { name: "pastry", icon: "bakery-dining" },
+  { name: "grocery", icon: "basket-outline" },
+  { name: "fast food", icon: "food-outline" },
+  { name: "pastry", icon: "cookie-outline" },// no outline version, best available
 ];
 
 export default function CategoryFilters() {
   return (
     <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={{ paddingLeft: 16 }}
-    style={styles.scrollContainer} // ✅ add this
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingLeft: 16 }}
+      style={styles.scrollContainer}
     >
-    {categories.map((item, i) => (
+      {categories.map((item, i) => (
         <TouchableOpacity key={i} style={styles.categoryButton}>
-        <MaterialIcons name={item.icon} size={20} color="#000" />
-        <Text style={styles.categoryText}>{item.name}</Text>
+          <MaterialCommunityIcons name={item.icon} size={20} color="#000" />
+          <Text style={styles.categoryText}>{item.name}</Text>
         </TouchableOpacity>
-    ))}
+      ))}
     </ScrollView>
-
   );
 }
 
 const styles = StyleSheet.create({
   scrollContainer: {
-      maxHeight: 40,
-      marginBottom: 20,
-    },
+    maxHeight: 40,
+    marginBottom: 20,
+  },
 
   categoryButton: {
     flexDirection: "row",

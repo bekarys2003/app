@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, usePathname } from "expo-router";
@@ -12,29 +12,58 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   const currentTab: "home" | "browse" | "reserves" = pathname.includes("browse")
-  ? "browse"
-  : pathname.includes("reserves")
-  ? "reserves"
-  : "home";
+    ? "browse"
+    : pathname.includes("reserves")
+    ? "reserves"
+    : "home";
+
+  const [lastClickedTab, setLastClickedTab] = useState<"home" | "browse" | "reserves" | "profile">(currentTab);
 
   const tabs = [
-    { name: "Home", icon: "home", target: "home", path: "/(tabs)" },
-    { name: "Browse", icon: "search", target: "browse", path: "/(tabs)/browse" },
-    { name: "Cart", icon: "cart", target: "reserves", path: "/(tabs)/reserves" },
-    { name: "Profile", icon: "person", target: "profile", path: "/(tabs)/profile" },
+    {
+      name: "Home",
+      icon: "home-outline",
+      activeIcon: "home",
+      target: "home",
+      path: "/(tabs)",
+    },
+    {
+      name: "Browse",
+      icon: "search-outline",
+      activeIcon: "search",
+      target: "browse",
+      path: "/(tabs)/browse",
+    },
+    {
+      name: "Cart",
+      icon: "cart-outline",
+      activeIcon: "cart",
+      target: "reserves",
+      path: "/(tabs)/reserves",
+    },
+    {
+      name: "Profile",
+      icon: "person-outline",
+      activeIcon: "person",
+      target: "profile",
+      path: "/(tabs)/profile",
+    },
   ];
 
   return (
     <View style={styles.bottomNav}>
       {tabs.map((tab, index) => {
-        const isActive = pathname === tab.path;
+        const isActive = lastClickedTab === tab.target;
+        const iconName = isActive ? tab.activeIcon : tab.icon;
 
         return (
           <TouchableOpacity
             key={index}
             style={styles.iconButton}
             onPress={() => {
+              setLastClickedTab(tab.target);
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
               router.push({
                 pathname: "/transition-screen",
                 params: { target: tab.target, from: currentTab },
@@ -43,11 +72,16 @@ export default function BottomNav() {
           >
             <View style={styles.iconWrapper}>
               <Ionicons
-                name={tab.icon}
+                name={iconName as any}
                 size={24}
                 color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
               />
-              <Text style={[styles.label, { color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR }]}>
+              <Text
+                style={[
+                  styles.label,
+                  { color: isActive ? ACTIVE_COLOR : INACTIVE_COLOR },
+                ]}
+              >
                 {tab.name}
               </Text>
             </View>
@@ -60,14 +94,11 @@ export default function BottomNav() {
 
 const styles = StyleSheet.create({
   bottomNav: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
     flexDirection: "row",
     justifyContent: "space-around",
-    alignItems: "flex-end",
-    paddingVertical: 8,
+    alignItems: "center",
+    paddingTop: 10,
+    paddingBottom: 25,
     borderTopWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",
@@ -75,7 +106,7 @@ const styles = StyleSheet.create({
   iconButton: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 10,
+    paddingHorizontal: 10,
   },
   iconWrapper: {
     alignItems: "center",

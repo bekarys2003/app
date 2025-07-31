@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+
 import TransitionWrapper from "../../components/TransitionWrapper";
-import HomeScreen from "./index"; // Home tab screen
-import BrowseScreen from "./browse"; // Browse tab screen
-import ReservesScreen from "./reserves"; // Cart tab screen
+import HomeScreen from "./index";
+import BrowseScreen from "./browse";
+import ReservesScreen from "./reserves";
+import SearchBar from "../../components/SearchBar";
+import CategoryFilters from "../../components/CategoryFilters";
+import SkeletonScreen from "../../components/SkeletonScreen";
 
 type Tab = "home" | "browse" | "reserves";
 
@@ -25,43 +34,103 @@ export default function TransitionScreen() {
     return "home";
   });
 
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  const [delayedReservesRender, setDelayedReservesRender] = useState(false);
+
   const pages: Tab[] = ["home", "browse", "reserves"];
   const direction: "left" | "right" =
     pages.indexOf(target) > pages.indexOf(current) ? "left" : "right";
 
+  // Shared animation values
+  const headerOpacity = useSharedValue(1);
+  const headerTranslateY = useSharedValue(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const path = target === "home" ? "/(tabs)" : "/(tabs)/" + target;
+    if (target === current) {
+      const path = target === "home" ? "/(tabs)" : `/(tabs)/${target}`;
       router.replace(path);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [target]);
+      return;
+    }
+
+    setShowSkeleton(true);
+    setDelayedReservesRender(false); // reset
+
+    const isTargetReserves = target === "reserves";
+    const isFromReserves = from === "reserves";
+    const isTargetHeader = target === "home" || target === "browse";
+
+    if (isTargetReserves) {
+      headerOpacity.value = withTiming(0, { duration: 250 });
+      headerTranslateY.value = withTiming(-50, { duration: 250 });
+
+      setTimeout(() => {
+        setDelayedReservesRender(true);
+        setShowSkeleton(false);
+        router.replace(`/(tabs)/${target}`);
+      }, 300);
+    } else if (isFromReserves && isTargetHeader) {
+      headerOpacity.value = withTiming(1, { duration: 250 });
+      headerTranslateY.value = withTiming(0, { duration: 250 });
+
+      setTimeout(() => {
+        setShowSkeleton(false);
+        router.replace(target === "home" ? "/(tabs)" : `/(tabs)/${target}`);
+      }, 300);
+    } else {
+      setTimeout(() => {
+        if (target === "reserves") setDelayedReservesRender(true);
+        setShowSkeleton(false);
+        router.replace(target === "home" ? "/(tabs)" : `/(tabs)/${target}`);
+      }, 300);
+    }
+  }, [target, from]);
+
+  const animatedHeaderStyle = useAnimatedStyle(() => ({
+    opacity: headerOpacity.value,
+    transform: [{ translateY: headerTranslateY.value }],
+  }));
+
+  const renderScreen = (tab: Tab) => {
+    if (tab === "reserves" && !delayedReservesRender) return <SkeletonScreen />;
+    if (tab === "home") return <HomeScreen skipAnimation />;
+    if (tab === "browse") return <BrowseScreen skipAnimation />;
+    return <ReservesScreen skipAnimation />;
+  };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
+      <Animated.View style={[styles.header, animatedHeaderStyle]}>
+        <SearchBar />
+        <CategoryFilters />
+      </Animated.View>
 
-      {/* Exit current screen */}
-      <TransitionWrapper direction={direction} isEntering={false}>
-        {current === "home" ? (
-          <HomeScreen skipAnimation />
-        ) : current === "browse" ? (
-          <BrowseScreen skipAnimation />
-        ) : (
-          <ReservesScreen skipAnimation />
-        )}
-      </TransitionWrapper>
+      <View style={{ flex: 1 }}>
+        {target !== current ? (
+          <>
+            <TransitionWrapper direction={direction} isEntering={false}>
+              {renderScreen(current)}
+            </TransitionWrapper>
 
-      {/* Enter new screen */}
-      <TransitionWrapper direction={direction} isEntering>
-        {target === "home" ? (
-          <HomeScreen skipAnimation />
-        ) : target === "browse" ? (
-          <BrowseScreen skipAnimation />
+            <TransitionWrapper direction={direction} isEntering>
+              {showSkeleton ? <SkeletonScreen /> : renderScreen(target)}
+            </TransitionWrapper>
+          </>
         ) : (
-          <ReservesScreen skipAnimation />
+          renderScreen(current)
         )}
-      </TransitionWrapper>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    paddingTop: 50,
+    backgroundColor: "#fff",
+    zIndex: 10,
+  },
+});

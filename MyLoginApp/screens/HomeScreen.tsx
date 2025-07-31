@@ -73,6 +73,7 @@ export default function HomeScreen({ skipAnimation }: Props) {
         <ScrollView style={{ flex: 1 }}>
         <CardList sectionTitle="Deals for You" cards={deals} />
         <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} />
+        <CardList sectionTitle="Deals for You" cards={deals} />
         </ScrollView>
       </Animated.View>
 
@@ -84,6 +85,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingBottom: 70,
+    paddingBottom: 0,
   },
 });
