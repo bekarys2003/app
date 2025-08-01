@@ -42,11 +42,11 @@ export default function BottomNav() {
       path: "/(tabs)/reserves",
     },
     {
-      name: "Profile",
+      name: "Accaunts",
       icon: "person-outline",
       activeIcon: "person",
-      target: "profile",
-      path: "/(tabs)/profile",
+      target: "accaunts",
+      path: "/(tabs)/accaunts",
     },
   ];
 

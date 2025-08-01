@@ -38,8 +38,11 @@ export default function TabsLayout() {
               </Text>
           </Animated.View>
         </View>
-      ) : null;
-  const hideSearchAndCategory = pathname === "/reserves" || pathname === "/cart";
+      )
+      : pathname === "/accaunts" || params.target === "accaunts"
+      ? "Accounts" // Add this condition for the "accaunts" page
+      : null;
+  const hideSearchAndCategory = pathname === "/reserves" || pathname === "/cart" || pathname === "/accaunts" || pathname === "/accaunts";
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: 50, zIndex: 1 }}>
