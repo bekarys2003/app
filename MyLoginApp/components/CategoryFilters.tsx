@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons"; // switched
 const categories = [
   { name: "grocery", icon: "basket-outline" },
   { name: "fast food", icon: "food-outline" },
-  { name: "pastry", icon: "cookie-outline" },// no outline version, best available
+  { name: "pastry", icon: "cookie-outline" },
 ];
 
 export default function CategoryFilters() {

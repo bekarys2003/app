@@ -41,7 +41,11 @@ export default function RootLayout() {
     }
   }, [isReady]);
 
+  useEffect(() => {
+    onLayoutRootView();
+  }, [onLayoutRootView]);
+
   if (!isReady) return null;
 
-  return <Slot onLayout={onLayoutRootView} />;
+  return <Slot />;
 }

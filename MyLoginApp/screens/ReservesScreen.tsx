@@ -24,10 +24,8 @@ function ReservesScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.container}>
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <Text style={styles.sectionTitle}>Reserves</Text>
 
           <View
             style={styles.reserveCard}
@@ -101,7 +99,6 @@ function ReservesScreen() {
           </ScrollView>
         </ScrollView>
       </View>
-    </SafeAreaView>
   );
 }
 
@@ -112,7 +109,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingBottom: 70,
+    paddingBottom: 0,
   },
   content: {
     flex: 1,
@@ -120,8 +117,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 16,
     marginLeft: 16,
+    marginBottom: 0
   },
   reserveCard: {
     backgroundColor: "#fef8e8",

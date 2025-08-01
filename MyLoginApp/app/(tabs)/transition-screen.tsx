@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import Animated, {
   useSharedValue,
@@ -94,11 +94,22 @@ export default function TransitionScreen() {
     if (tab === "reserves" && !delayedReservesRender) return <SkeletonScreen />;
     if (tab === "home") return <HomeScreen skipAnimation />;
     if (tab === "browse") return <BrowseScreen skipAnimation />;
-    return <ReservesScreen skipAnimation />;
+    return <ReservesScreen />;
   };
+
+  const headerTitle =
+    target === "reserves" || pathname === "/(tabs)/reserves"
+      ? "Cart"
+      : target === "browse" || pathname.includes("browse")
+      ? "Browse"
+      : "Home";
 
   return (
     <View style={styles.container}>
+      {/* Always-visible header title */}
+      <Text style={styles.browseTitle}>{headerTitle}</Text>
+
+      {/* Animated header components (except title) */}
       <Animated.View style={[styles.header, animatedHeaderStyle]}>
         <SearchBar />
         <CategoryFilters />
@@ -129,8 +140,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    paddingTop: 50,
     backgroundColor: "#fff",
     zIndex: 10,
+  },
+  browseTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 16,
+    marginBottom: 0,
+    paddingTop: 0,
+    backgroundColor: "#fff",
   },
 });

@@ -33,7 +33,7 @@ export default function TransitionScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       const path = target === "home" ? "/(tabs)" : "/(tabs)/" + target;
-      router.replace(path);
+      router.replace(path as "/(tabs)" | "/(tabs)/browse" | "/(tabs)/reserves");
     }, 300);
     return () => clearTimeout(timer);
   }, [target]);
@@ -48,7 +48,7 @@ export default function TransitionScreen() {
         ) : current === "browse" ? (
           <BrowseScreen skipAnimation />
         ) : (
-          <ReservesScreen skipAnimation />
+          <ReservesScreen  />
         )}
       </TransitionWrapper>
 
@@ -59,7 +59,7 @@ export default function TransitionScreen() {
         ) : target === "browse" ? (
           <BrowseScreen skipAnimation />
         ) : (
-          <ReservesScreen skipAnimation />
+          <ReservesScreen  />
         )}
       </TransitionWrapper>
     </View>
