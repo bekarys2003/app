@@ -1,3 +1,4 @@
+// /Users/beka/Desktop/proj/startup/MyLoginApp/app/_layout.tsx
 import { Slot, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useCallback, useContext } from "react";

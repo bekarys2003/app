@@ -1,65 +1,63 @@
+// /Users/beka/Desktop/proj/startup/MyLoginApp/app/(tabs)/_layout.tsx
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Slot, usePathname, useLocalSearchParams } from "expo-router";
 import SearchBar from "../../components/SearchBar";
 import CategoryFilters from "../../components/CategoryFilters";
 import BottomNav from "../../components/BottomNav";
-import { MaterialIcons } from "@expo/vector-icons"; // Import the icon library
+import { MaterialIcons } from "@expo/vector-icons";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 export default function TabsLayout() {
   const pathname = usePathname();
   const params = useLocalSearchParams<{ target?: string; from?: string }>();
 
-  let showHeader = false;
-  if (pathname === "/" || pathname === "/browse") {
-    showHeader = true;
-  } else if (pathname === "/transition-screen") {
-    const { target, from } = params;
-    showHeader =
-      (target === "home" || target === "browse") &&
-      (from === "home" || from === "browse");
+  const isHome = pathname === "/" || params.target === "home";
+  const isBrowse = pathname === "/browse" || params.target === "browse";
+  const isCart = pathname === "/reserves" || pathname === "/cart";
+  const isAccounts = pathname === "/accaunts" || params.target === "accaunts";
+
+  const showHeader = isHome || isBrowse;
+  const showNav = !pathname.includes("modal");
+  const hideSearchAndCategory = isCart || isAccounts;
+
+  // Dynamically set the header content
+  let headerComponent: React.ReactNode = null;
+
+  if (isCart) {
+    headerComponent = <Text style={styles.browseTitle}>Cart</Text>;
+  } else if (isBrowse) {
+    headerComponent = <Text style={styles.browseTitle}>Browse</Text>;
+  } else if (isHome) {
+    headerComponent = (
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        exiting={FadeOut.duration(200)}
+        style={[styles.homeTitleContainer, { marginLeft: 16, marginBottom: 8 }]}
+      >
+        <MaterialIcons name="location-on" size={18} color="black" />
+        <Text style={[styles.browseTitle, styles.homeTitle, styles.noMargin]}>
+          178 Pier Pl
+        </Text>
+      </Animated.View>
+    );
+  } else if (isAccounts) {
+    headerComponent = <Text style={styles.browseTitle}>Accounts</Text>;
   }
 
-  const showNav = !pathname.includes("modal");
-
-  // Determine the header title dynamically
-  const headerTitle =
-    pathname === "/reserves" || pathname === "/cart"
-      ? "Cart"
-      : pathname === "/browse" || params.target === "browse"
-      ? "Browse"
-      : pathname === "/" || params.target === "home" ? (
-        <View style={styles.homeTitleContainer}>
-          <Animated.View entering={FadeIn.duration(300)} exiting={FadeOut.duration(200)} style={styles.homeTitleContainer}>
-              <MaterialIcons name="location-on" size={18} color="black" />
-              <Text style={[styles.browseTitle, styles.homeTitle, styles.noMargin]}>
-                178 Pier Pl
-              </Text>
-          </Animated.View>
-        </View>
-      )
-      : pathname === "/accaunts" || params.target === "accaunts"
-      ? "Accounts" // Add this condition for the "accaunts" page
-      : null;
-  const hideSearchAndCategory = pathname === "/reserves" || pathname === "/cart" || pathname === "/accaunts" || pathname === "/accaunts";
-
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: 50, zIndex: 1 }}>
-      {headerTitle ? (
-      <Text style={styles.browseTitle}>{headerTitle}</Text>
-    ) : null}
-      {showHeader && (
-        <View>
-          {!hideSearchAndCategory && (
-            <>
-              <SearchBar />
-              <CategoryFilters />
-            </>
-          )}
-        </View>
+    <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: 50 }}>
+      {headerComponent}
+
+      {showHeader && !hideSearchAndCategory && (
+        <>
+          <SearchBar />
+          <CategoryFilters />
+        </>
       )}
+
       <Slot />
+
       {showNav && <BottomNav />}
     </View>
   );
@@ -73,13 +71,13 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   homeTitleContainer: {
-    flexDirection: "row", // Align icon and text horizontally
-    alignItems: "center", // Vertically center the icon and text
+    flexDirection: "row",
+    alignItems: "center",
   },
   homeTitle: {
-    fontSize: 18, // Smaller font size for the home page
+    fontSize: 18,
   },
   noMargin: {
-    marginLeft: 4, // Add a small margin to the text to bring it closer to the icon
+    marginLeft: 4,
   },
 });
