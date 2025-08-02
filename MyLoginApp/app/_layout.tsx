@@ -1,10 +1,36 @@
-import { Slot } from "expo-router";
+import { Slot, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useContext } from "react";
 import * as Font from "expo-font";
 import { Asset } from "expo-asset";
+import { AuthProvider, AuthContext } from "../context/AuthContext"; // ✅ import AuthProvider and context
 
 SplashScreen.preventAutoHideAsync(); // keep splash until ready
+
+function RootLayoutInner() {
+  const { isAuthenticated, isLoading } = useContext(AuthContext);
+  const router = useRouter();
+  const segments: string[] = useSegments();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthTabs = segments.includes("auth-tabs");
+    const inLogin = segments.includes("login") || segments.includes("signup");
+
+    if (!isAuthenticated && !inAuthTabs && !inLogin) {
+      router.replace("/(tabs)/auth-tabs/login" as any);
+    }
+
+    if (isAuthenticated && (inAuthTabs || inLogin)) {
+      router.replace("/(tabs)"); // ✅ adjust this to match your app structure
+    }
+  }, [isAuthenticated, isLoading, segments]);
+
+
+  if (isLoading) return null;
+  return <Slot />;
+}
 
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
@@ -47,5 +73,9 @@ export default function RootLayout() {
 
   if (!isReady) return null;
 
-  return <Slot />;
+  return (
+    <AuthProvider>
+      <RootLayoutInner />
+    </AuthProvider>
+  );
 }

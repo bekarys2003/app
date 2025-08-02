@@ -48,7 +48,7 @@ export default function TransitionScreen() {
   useEffect(() => {
     if (target === current) {
       const path = target === "home" ? "/(tabs)" : `/(tabs)/${target}`;
-      router.replace(path);
+      router.replace(path as "/(tabs)" | "/(tabs)/reserves" | "/(tabs)/accaunts");
       return;
     }
 
@@ -78,7 +78,7 @@ export default function TransitionScreen() {
       }, 300);
     } else {
       setTimeout(() => {
-        if (target === "reserves" || target === "accaunts") setDelayedReservesRender(true);
+        if ((target as Tab) === "reserves" || (target as Tab) === "accaunts") setDelayedReservesRender(true);
         setShowSkeleton(false);
         router.replace(target === "home" ? "/(tabs)" : `/(tabs)/${target}`);
       }, 300);

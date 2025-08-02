@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
-import CardList from "../components/CardList";
 import { useLocalSearchParams } from "expo-router";
 import Animated, {
   useSharedValue,
@@ -8,6 +7,7 @@ import Animated, {
   withTiming,
   runOnUI,
 } from "react-native-reanimated";
+import CardList from "../components/CardList";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -15,9 +15,7 @@ type Props = {
   skipAnimation?: boolean;
 };
 
-
 export default function HomeScreen({ skipAnimation }: Props) {
-
   const translateX = useSharedValue(0);
   const { fromNav } = useLocalSearchParams();
 
@@ -66,17 +64,15 @@ export default function HomeScreen({ skipAnimation }: Props) {
     },
   ];
 
-
   return (
     <View style={styles.container}>
       <Animated.View style={[animatedStyle, { flex: 1 }]}>
         <ScrollView style={{ flex: 1 }}>
-        <CardList sectionTitle="Deals for You" cards={deals} />
-        <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} />
-        <CardList sectionTitle="Deals for You" cards={deals} />
+          <CardList sectionTitle="Deals for You" cards={deals} />
+          <CardList sectionTitle="Hot Takes 🔥" cards={hotTakes} />
+          <CardList sectionTitle="Deals for You" cards={deals} />
         </ScrollView>
       </Animated.View>
-
     </View>
   );
 }
