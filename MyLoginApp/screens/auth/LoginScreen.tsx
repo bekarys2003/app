@@ -46,6 +46,11 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Top-left back button */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/auth")}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Welcome Back 👋</Text>
       <Text style={styles.subtitle}>Sign in to continue</Text>
 
@@ -89,10 +94,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#fdfdfd",
     padding: 24,
   },
+  backButton: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    zIndex: 1,
+    padding: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#F56060",
+  },
   title: {
     fontSize: 28,
     fontWeight: "600",
     marginBottom: 8,
+    marginTop: 100, // Push content below the back button
     color: "#222",
   },
   subtitle: {
@@ -119,7 +136,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   buttonDisabled: {
-    backgroundColor: "#f3a5a5", // lighter tone when disabled
+    backgroundColor: "#f3a5a5",
   },
   buttonText: {
     color: "#fff",

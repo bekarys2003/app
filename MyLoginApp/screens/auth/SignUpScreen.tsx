@@ -1,18 +1,12 @@
 import React, { useState, useContext } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import Constants from "expo-constants";
 import { AuthContext } from "../../context/AuthContext";
+import Constants from "expo-constants";
 
-WebBrowser.maybeCompleteAuthSession();
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 export default function SignUpScreen() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,13 +14,7 @@ export default function SignUpScreen() {
   const router = useRouter();
   const { login } = useContext(AuthContext);
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: "9816983038-gs6t478e6vo67af9p4askcdsf4qctomv.apps.googleusercontent.com",
-  });
-
   const isFormValid =
-    firstName.trim() !== "" &&
-    lastName.trim() !== "" &&
     email.trim() !== "" &&
     password.trim() !== "" &&
     confirmPassword.trim() !== "" &&
@@ -44,8 +32,6 @@ export default function SignUpScreen() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
           email,
           password,
           password_confirm: confirmPassword,
@@ -55,9 +41,8 @@ export default function SignUpScreen() {
       const data = await response.json();
       if (response.ok && data.token) {
         console.log("Redirecting to main...");
-        await login(data.token); // 👈 triggers the same effect as in LoginScreen
+        await login(data.token);
         router.replace("/(tabs)");
-
       } else {
         Alert.alert("Error", data.message || "Sign up failed.");
       }
@@ -70,26 +55,13 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Top-left back button */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/auth")}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Create Account 👋</Text>
       <Text style={styles.subtitle}>Let`s get you started</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="First Name"
-        placeholderTextColor="#999"
-        value={firstName}
-        onChangeText={setFirstName}
-        autoCapitalize="words"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Last Name"
-        placeholderTextColor="#999"
-        value={lastName}
-        onChangeText={setLastName}
-        autoCapitalize="words"
-      />
 
       <TextInput
         style={styles.input}
@@ -126,16 +98,6 @@ export default function SignUpScreen() {
       >
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign Up</Text>}
       </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.button, styles.googleButton]}
-        onPress={() => promptAsync()}
-        disabled={!request || loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? "Signing up..." : "Sign Up with Google"}
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -146,10 +108,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#fdfdfd",
     padding: 24,
   },
+  backButton: {
+    position: "absolute",
+    top: 20,
+    left: 20,
+    zIndex: 1,
+    padding: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#F56060",
+  },
   title: {
     fontSize: 28,
     fontWeight: "600",
     marginBottom: 8,
+    marginTop: 100, // Push content below the back button
     color: "#222",
   },
   subtitle: {
@@ -177,10 +151,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: "#f3a5a5",
-  },
-  googleButton: {
-    backgroundColor: "#DB4437",
-    marginTop: 12,
   },
   buttonText: {
     color: "#fff",
