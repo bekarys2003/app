@@ -20,7 +20,7 @@ function RootLayoutInner() {
     const inLogin = segments.includes("login") || segments.includes("signup");
 
     if (!isAuthenticated && !inAuthTabs && !inLogin) {
-      router.replace("/(tabs)/auth-tabs/login" as any);
+      router.replace("/(tabs)/auth-tabs/auth" as any);
     }
 
     if (isAuthenticated && (inAuthTabs || inLogin)) {

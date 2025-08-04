@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { AuthContext } from "../context/AuthContext";
-// import { API_BASE_URL } from '@env';
 
 export default function AccountScreen() {
   const [loading, setLoading] = useState(false);

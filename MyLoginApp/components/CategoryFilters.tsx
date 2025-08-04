@@ -28,7 +28,7 @@ export default function CategoryFilters() {
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    maxHeight: 40,
+    maxHeight: 34,
     marginBottom: 20,
   },
 

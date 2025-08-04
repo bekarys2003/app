@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router"; // or useNavigation if not using Expo Router
+import { useRouter } from "expo-router";
+import Constants from "expo-constants";
 
 
 WebBrowser.maybeCompleteAuthSession();
+const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 export default function SignUpScreen() {
   const [name, setName] = useState("");
@@ -14,44 +16,37 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  // Google OAuth setup
+
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: "9816983038-gs6t478e6vo67af9p4askcdsf4qctomv.apps.googleusercontent.com",
   });
+
+  const isFormValid = name.trim() && email.trim() && password.trim();
 
   const handleGoogleSignUp = async () => {
     if (response?.type === "success") {
       const { authentication } = response;
       const token = authentication?.accessToken;
 
-      if (!token) {
-        Alert.alert("Error", "Google token not provided.");
-        return;
-      }
+      if (!token) return Alert.alert("Error", "Google token not provided.");
 
       try {
         setLoading(true);
-
-        // Send the Google token to the backend
-        const backendResponse = await fetch("http://127.0.0.1:8000/api/google-auth", {
+        const backendResponse = await fetch(`${API_BASE_URL}/google-auth`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });
 
         const data = await backendResponse.json();
-
         if (backendResponse.ok && data.token) {
           await AsyncStorage.setItem("accessToken", data.token);
-          Alert.alert("Success", "Account created successfully!");
-          router.replace("/"); // Navigate to home or app root
+          router.replace("/(tabs)");
         } else {
-          Alert.alert("Error", data.message || "Google sign-up failed. Please try again.");
+          Alert.alert("Error", data.message || "Google sign-up failed.");
         }
-      } catch (error) {
-        Alert.alert("Error", "An error occurred. Please try again later123.");
+      } catch {
+        Alert.alert("Error", "An error occurred. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -59,35 +54,25 @@ export default function SignUpScreen() {
   };
 
   const handleSignUp = async () => {
-    if (!name || !email || !password) {
-      Alert.alert("Error", "Please fill in all fields.");
-      return;
-    }
+    if (!isFormValid) return;
 
     setLoading(true);
-
     try {
-      // Backend API endpoint for manual sign-up
-      const response = await fetch("http://127.0.0.1:8000/api/register", {
+      const response = await fetch(`${API_BASE_URL}/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
-
       if (response.ok && data.token) {
         await AsyncStorage.setItem("accessToken", data.token);
-        Alert.alert("Success", "Account created successfully!");
-        router.replace("/"); // Or navigate to AppStack
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Error", data.message || "Sign up failed.");
       }
-       else {
-        Alert.alert("Error", data.message || "Sign up failed. Please try again.");
-      }
-    } catch (error) {
-      Alert.alert("Error", "An error occurred. Please try again laterrrrr.");
+    } catch {
+      Alert.alert("Error", "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -95,11 +80,13 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
+      <Text style={styles.title}>Create Account 👋</Text>
+      <Text style={styles.subtitle}>Lets get you started</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Name"
+        placeholder="Full Name"
+        placeholderTextColor="#999"
         value={name}
         onChangeText={setName}
         autoCapitalize="words"
@@ -108,6 +95,7 @@ export default function SignUpScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#999"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -117,21 +105,28 @@ export default function SignUpScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="#999"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? "Signing up..." : "Sign Up"}</Text>
+      <TouchableOpacity
+        style={[styles.button, !isFormValid && styles.buttonDisabled]}
+        onPress={handleSignUp}
+        disabled={!isFormValid || loading}
+      >
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign Up</Text>}
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: "#DB4437", marginTop: 10 }]}
+        style={[styles.button, styles.googleButton]}
         onPress={() => promptAsync()}
         disabled={!request || loading}
       >
-        <Text style={styles.buttonText}>{loading ? "Signing up..." : "Sign Up with Google"}</Text>
+        <Text style={styles.buttonText}>
+          {loading ? "Signing up..." : "Sign Up with Google"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -140,36 +135,48 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 16,
+    backgroundColor: "#fdfdfd",
+    padding: 24,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
+    fontSize: 28,
+    fontWeight: "600",
+    marginBottom: 8,
+    color: "#222",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 32,
   },
   input: {
-    width: "100%",
     height: 50,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 15,
+    borderColor: "#e0e0e0",
+    backgroundColor: "#fafafa",
+    paddingHorizontal: 16,
+    fontSize: 16,
+    marginBottom: 16,
+    color: "#333",
   },
   button: {
-    backgroundColor: "#007BFF",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    width: "100%",
+    backgroundColor: "#F56060",
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: "center",
+    marginTop: 8,
+  },
+  buttonDisabled: {
+    backgroundColor: "#f3a5a5",
+  },
+  googleButton: {
+    backgroundColor: "#DB4437",
+    marginTop: 12,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "600",
   },
 });

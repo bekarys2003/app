@@ -1,4 +1,4 @@
-// /Users/beka/Desktop/proj/startup/MyLoginApp/app/(tabs)/_layout.tsx
+// app/(tabs)/_layout.tsx
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Slot, usePathname, useLocalSearchParams } from "expo-router";
@@ -18,10 +18,14 @@ export default function TabsLayout() {
   const isAccounts = pathname === "/accaunts" || params.target === "accaunts";
 
   const showHeader = isHome || isBrowse;
-  const showNav = !pathname.includes("modal");
-  const hideSearchAndCategory = isCart || isAccounts;
 
-  // Dynamically set the header content
+  // ⛔️ NEW: Detect login/signup page
+  const isAuthPage = pathname.includes("/login") || pathname.includes("/signup") || pathname.includes("/auth");
+
+  const showNav = !pathname.includes("modal") && !isAuthPage;
+  const hideSearchAndCategory = isCart || isAccounts || isAuthPage;
+
+  // Dynamic header rendering
   let headerComponent: React.ReactNode = null;
 
   if (isCart) {
@@ -33,11 +37,11 @@ export default function TabsLayout() {
       <Animated.View
         entering={FadeIn.duration(300)}
         exiting={FadeOut.duration(200)}
-        style={[styles.homeTitleContainer, { marginLeft: 16, marginBottom: 8 }]}
+        style={[styles.homeTitleContainer, { marginLeft: 16 }]}
       >
         <MaterialIcons name="location-on" size={18} color="black" />
         <Text style={[styles.browseTitle, styles.homeTitle, styles.noMargin]}>
-          178 Pier Pl
+          13398 104 Ave
         </Text>
       </Animated.View>
     );
@@ -47,7 +51,7 @@ export default function TabsLayout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: 50 }}>
-      {headerComponent}
+      {!isAuthPage && headerComponent}
 
       {showHeader && !hideSearchAndCategory && (
         <>
