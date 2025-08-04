@@ -1,73 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
-
+import { AuthContext } from "../../context/AuthContext";
 
 WebBrowser.maybeCompleteAuthSession();
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 export default function SignUpScreen() {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useContext(AuthContext);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: "9816983038-gs6t478e6vo67af9p4askcdsf4qctomv.apps.googleusercontent.com",
   });
 
-  const isFormValid = name.trim() && email.trim() && password.trim();
-
-  const handleGoogleSignUp = async () => {
-    if (response?.type === "success") {
-      const { authentication } = response;
-      const token = authentication?.accessToken;
-
-      if (!token) return Alert.alert("Error", "Google token not provided.");
-
-      try {
-        setLoading(true);
-        const backendResponse = await fetch(`${API_BASE_URL}/google-auth`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
-        });
-
-        const data = await backendResponse.json();
-        if (backendResponse.ok && data.token) {
-          await AsyncStorage.setItem("accessToken", data.token);
-          router.replace("/(tabs)");
-        } else {
-          Alert.alert("Error", data.message || "Google sign-up failed.");
-        }
-      } catch {
-        Alert.alert("Error", "An error occurred. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
+  const isFormValid =
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    email.trim() !== "" &&
+    password.trim() !== "" &&
+    confirmPassword.trim() !== "" &&
+    password === confirmPassword;
 
   const handleSignUp = async () => {
-    if (!isFormValid) return;
+    if (!isFormValid) {
+      Alert.alert("Error", "Please complete all fields and ensure passwords match.");
+      return;
+    }
 
     setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          password,
+          password_confirm: confirmPassword,
+        }),
       });
 
       const data = await response.json();
       if (response.ok && data.token) {
-        await AsyncStorage.setItem("accessToken", data.token);
+        console.log("Redirecting to main...");
+        await login(data.token); // 👈 triggers the same effect as in LoginScreen
         router.replace("/(tabs)");
+
       } else {
         Alert.alert("Error", data.message || "Sign up failed.");
       }
@@ -81,14 +71,23 @@ export default function SignUpScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account 👋</Text>
-      <Text style={styles.subtitle}>Lets get you started</Text>
+      <Text style={styles.subtitle}>Let`s get you started</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Full Name"
+        placeholder="First Name"
         placeholderTextColor="#999"
-        value={name}
-        onChangeText={setName}
+        value={firstName}
+        onChangeText={setFirstName}
+        autoCapitalize="words"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Last Name"
+        placeholderTextColor="#999"
+        value={lastName}
+        onChangeText={setLastName}
         autoCapitalize="words"
       />
 
@@ -108,6 +107,15 @@ export default function SignUpScreen() {
         placeholderTextColor="#999"
         value={password}
         onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        placeholderTextColor="#999"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
         secureTextEntry
       />
 

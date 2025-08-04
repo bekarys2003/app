@@ -1,9 +1,59 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+
+WebBrowser.maybeCompleteAuthSession();
+const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 export default function AuthScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: "9816983038-gs6t478e6vo67af9p4askcdsf4qctomv.apps.googleusercontent.com",
+  });
+
+  useEffect(() => {
+    const handleGoogleLogin = async () => {
+      if (response?.type === "success") {
+        const token = response.authentication?.accessToken;
+
+        if (!token) {
+          Alert.alert("Error", "No access token from Google.");
+          return;
+        }
+
+        try {
+          setLoading(true);
+          const res = await fetch(`${API_BASE_URL}/google-auth`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token }),
+          });
+
+          const data = await res.json();
+          if (res.ok && data.token) {
+            await AsyncStorage.setItem("accessToken", data.token);
+            router.replace("/(tabs)");
+          } else {
+            Alert.alert("Error", data.message || "Google login failed.");
+          }
+        } catch {
+          Alert.alert("Error", "Google login error occurred.");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    handleGoogleLogin();
+  }, [response]);
 
   return (
     <View style={styles.container}>
@@ -23,16 +73,28 @@ export default function AuthScreen() {
       >
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.googleButton]}
+        onPress={() => promptAsync()}
+        disabled={!request || loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Continue with Google</Text>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: "#fdfdfd",
       padding: 24,
-      justifyContent: "center",
-      alignItems: "center",
+
     },
     title: {
       fontSize: 32,
@@ -44,7 +106,7 @@ const styles = StyleSheet.create({
       fontSize: 16,
       color: "#666",
       marginBottom: 40,
-      textAlign: "center",
+
     },
     button: {
       backgroundColor: "#F56060",
@@ -57,6 +119,9 @@ const styles = StyleSheet.create({
     },
     signUpButton: {
       backgroundColor: "#007AFF",
+    },
+    googleButton: {
+      backgroundColor: "#DB4437",
     },
     buttonText: {
       color: "#fff",

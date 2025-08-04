@@ -12,7 +12,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
+from django.utils import timezone
 
+# views.py
 class RegisterAPIView(APIView):
     def post(self, request):
         data = request.data
@@ -21,9 +23,26 @@ class RegisterAPIView(APIView):
             raise exceptions.APIException('Password do not match!')
 
         serializer = UserSerializer(data=data)
+
+
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        user = serializer.save()
+
+        # Auto-login after registration
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+
+        UserToken.objects.create(
+            user_id=user.id,
+            token=refresh_token,
+            expired_at = timezone.now() + datetime.timedelta(days=7)
+        )
+
+        response = Response({
+            'token': access_token
+        })
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+        return response
 
 
 class LoginAPIView(APIView):
