@@ -72,16 +72,9 @@ export default function AuthScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.replace("/(tabs)/auth-tabs/login")}
-      >
-        <Text style={styles.buttonText}>Log In</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.button, styles.signUpButton]}
         onPress={() => router.replace("/(tabs)/auth-tabs/signup")}
       >
-        <Text style={styles.buttonText}>Sign Up</Text>
+        <Text style={styles.buttonText}>Sign Up with Email</Text>
       </TouchableOpacity>
 
       <TouchableOpacity

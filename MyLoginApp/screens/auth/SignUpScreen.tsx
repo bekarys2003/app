@@ -56,7 +56,7 @@ export default function SignUpScreen() {
   return (
     <View style={styles.container}>
       {/* Top-left back button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/auth-tabs/auth")}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/auth-tabs/login")}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
 
@@ -98,11 +98,36 @@ export default function SignUpScreen() {
       >
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign Up</Text>}
       </TouchableOpacity>
+
+      <View style={styles.signupContainer}>
+        <Text style={styles.signupText}>Already have an account?</Text>
+        <TouchableOpacity onPress={() => router.push("/auth-tabs/login")}>
+          <Text style={styles.signupLink}>Login</Text>
+        </TouchableOpacity>
+      </View>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  signupContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 24,
+  },
+
+  signupText: {
+    fontSize: 14,
+    color: "#555",
+    marginRight: 4,
+  },
+
+  signupLink: {
+    fontSize: 14,
+    color: "#F56060",
+    fontWeight: "600",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fdfdfd",

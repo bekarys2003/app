@@ -91,10 +91,12 @@ export default function LoginScreen() {
       </View>
 
     </View>
+
   );
 }
 
 const styles = StyleSheet.create({
+
   forgotContainer: {
     alignItems: "flex-end",
     marginTop: 10,
