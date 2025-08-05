@@ -5,6 +5,7 @@ import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import * as AuthSession from "expo-auth-session";
 
 WebBrowser.maybeCompleteAuthSession();
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
@@ -13,9 +14,18 @@ export default function AuthScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  const redirectUri = AuthSession.makeRedirectUri({ useProxy: true } as any);
+
+  const iosClientId = Constants.expoConfig?.extra?.GOOGLE_IOS_CLIENT_ID;
+  const webClientId = Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID;
+
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: "9816983038-gs6t478e6vo67af9p4askcdsf4qctomv.apps.googleusercontent.com",
+    iosClientId,
+    webClientId,
+    redirectUri,
   });
+
+
 
   useEffect(() => {
     const handleGoogleLogin = async () => {

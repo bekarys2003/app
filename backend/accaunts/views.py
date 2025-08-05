@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
 from django.utils import timezone
-
+from decouple import config
 # views.py
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -122,12 +122,13 @@ class ForgotAPIView(APIView):
             email=email,
             token=token
         )
-        url = 'http://localhost:3000/reset/'+token
+        url = f"http://localhost:8081/auth-tabs/reset/{token}"
         send_mail(
             subject='Reset your password',
-            message='Click <a href="%s">here</a> to reset your password' % url,
+            message=f'Click the following link to reset your password: {url}',
             from_email='from@example.com',
-            recipient_list=[email]
+            recipient_list=[email],
+            html_message=f'Click <a href="{url}">here</a> to reset your password'
         )
 
         return Response({

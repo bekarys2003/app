@@ -56,7 +56,7 @@ export default function SignUpScreen() {
   return (
     <View style={styles.container}>
       {/* Top-left back button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/auth")}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/auth-tabs/auth")}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
 

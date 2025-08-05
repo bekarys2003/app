@@ -47,7 +47,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       {/* Top-left back button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/auth")}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/auth-tabs/auth")}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
 
@@ -84,16 +84,35 @@ export default function LoginScreen() {
           <Text style={styles.buttonText}>Sign In</Text>
         )}
       </TouchableOpacity>
+      <View style={styles.forgotContainer}>
+        <TouchableOpacity onPress={() => router.push("/auth-tabs/reset-request")}>
+          <Text style={styles.forgotText}>Forgot Password?</Text>
+        </TouchableOpacity>
+      </View>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  forgotContainer: {
+    alignItems: "flex-end",
+    marginTop: 10,
+
+  },
+
+  forgotText: {
+    color: "#007AFF",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#fdfdfd",
     padding: 24,
   },
+
   backButton: {
     position: "absolute",
     top: 20,
