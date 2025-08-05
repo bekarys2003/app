@@ -13,7 +13,9 @@ from django.views.decorators.csrf import csrf_exempt
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
 from django.utils import timezone
-from decouple import config
+from django.http import JsonResponse
+import json
+
 # views.py
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -207,3 +209,69 @@ class GoogleAuthAPIView(APIView):
         })
         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
         return response
+
+
+@csrf_exempt
+def apple_auth_view(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        identity_token = body.get("token")
+        if not identity_token:
+            return JsonResponse({"error": "Token not provided"}, status=400)
+
+        # Decode token header to get 'kid'
+        from jose import jwt
+        import requests
+        from jose.exceptions import JWTError
+
+        headers = jwt.get_unverified_header(identity_token)
+        apple_keys = requests.get("https://appleid.apple.com/auth/keys").json()["keys"]
+
+        key = next((k for k in apple_keys if k["kid"] == headers["kid"]), None)
+        if not key:
+            return JsonResponse({"error": "Invalid token: key not found"}, status=400)
+
+        decoded = jwt.decode(
+            identity_token,
+            key,
+            algorithms=["RS256"],
+            audience="host.exp.Exponent",  # 👈 or your real iOS client ID
+            issuer="https://appleid.apple.com",
+        )
+
+        email = decoded.get("email")
+        sub = decoded.get("sub")
+
+        if not email:
+            return JsonResponse({"error": "Email not present in token"}, status=400)
+
+        user = User.objects.filter(email=email).first()
+
+        if not user:
+            user = User.objects.create(
+                email=email
+            )
+            user.set_password(identity_token)
+            user.save()
+
+        # Generate tokens
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+
+        UserToken.objects.create(
+            user_id=user.id,
+            token=refresh_token,
+            expired_at = timezone.now() + datetime.timedelta(days=7)
+        )
+
+        response = JsonResponse({"token": access_token})
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+        return response
+
+    except JWTError as e:
+        return JsonResponse({"error": f"Invalid token: {str(e)}"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

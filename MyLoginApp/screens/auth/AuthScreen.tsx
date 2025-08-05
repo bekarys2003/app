@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import * as Google from "expo-auth-session/providers/google";
@@ -6,6 +6,9 @@ import * as WebBrowser from "expo-web-browser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import * as AuthSession from "expo-auth-session";
+import * as AppleAuthentication from "expo-apple-authentication";
+import * as AppleAuthenticationTypes from "expo-apple-authentication";
+import { AuthContext } from "../../context/AuthContext";
 
 WebBrowser.maybeCompleteAuthSession();
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
@@ -13,8 +16,9 @@ const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 export default function AuthScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-
+  const [isAppleAvailable, setIsAppleAvailable] = useState(false);
   const redirectUri = AuthSession.makeRedirectUri({ useProxy: true } as any);
+  const { login } = useContext(AuthContext);
 
   const iosClientId = Constants.expoConfig?.extra?.GOOGLE_IOS_CLIENT_ID;
   const webClientId = Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID;
@@ -25,7 +29,13 @@ export default function AuthScreen() {
     redirectUri,
   });
 
-
+  useEffect(() => {
+    const checkAppleAvailability = async () => {
+      const available = await AppleAuthentication.isAvailableAsync();
+      setIsAppleAvailable(available);
+    };
+    checkAppleAvailability();
+  }, []);
 
   useEffect(() => {
     const handleGoogleLogin = async () => {
@@ -49,7 +59,7 @@ export default function AuthScreen() {
 
           const data = await res.json();
           if (res.ok && data.token) {
-            await AsyncStorage.setItem("accessToken", data.token);
+            await login(data.token); // <-- triggers isAuthenticated = true
             router.replace("/(tabs)");
           } else {
             Alert.alert("Error", data.message || "Google login failed.");
@@ -88,6 +98,58 @@ export default function AuthScreen() {
           <Text style={styles.buttonText}>Continue with Google</Text>
         )}
       </TouchableOpacity>
+      {isAppleAvailable && (
+        <AppleAuthentication.AppleAuthenticationButton
+            buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+            cornerRadius={12}
+            style={{ width: "100%", height: 50, marginVertical: 10 }}
+            onPress={async () => {
+            try {
+                setLoading(true);
+
+                const credential: AppleAuthenticationTypes.AppleAuthenticationCredential = await AppleAuthentication.signInAsync({
+                requestedScopes: [
+                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                ],
+                });
+
+                const identityToken = credential.identityToken;
+
+                if (!identityToken) {
+                Alert.alert("Apple Sign-In Failed", "No identity token received.");
+                return;
+                }
+
+                const res = await fetch(`${API_BASE_URL}/apple-auth`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ token: identityToken }),
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.token) {
+                    await login(data.token); // <-- triggers isAuthenticated = true
+                    router.replace("/(tabs)");
+                } else {
+                Alert.alert("Error", data.message || "Apple login failed.");
+                }
+            } catch (e: any) {
+                if (e.code !== "ERR_CANCELED") {
+                console.error("Apple Login Error:", e);
+                Alert.alert("Error", "Something went wrong with Apple Sign-In.");
+                }
+            } finally {
+                setLoading(false);
+            }
+            }}
+        />
+        )}
+
     </View>
   );
 }
