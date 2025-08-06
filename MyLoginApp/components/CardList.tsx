@@ -1,14 +1,25 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons"; // Import the icon library
+import { MaterialIcons } from "@expo/vector-icons";
 
 type CardProps = {
+  id: string;
   title: string;
   address: string;
-  time: string;
-  image: any; // local require(...)
+  time: string; // e.g., "10:00 - 17:00"
+  image: { uri: string }; // remote image URL
+  rating?: number;
+  ratingCount?: number;
+  distanceKm?: number;
 };
 
 type CardListProps = {
@@ -19,9 +30,12 @@ type CardListProps = {
 export default function CardList({ sectionTitle, cards }: CardListProps) {
   const router = useRouter();
 
-  const handleCardPress = () => {
+  const handleCardPress = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/modal/itemDetail");
+    router.push({
+      pathname: "/modal/itemDetail",
+      params: { id },
+    });
   };
 
   return (
@@ -33,18 +47,27 @@ export default function CardList({ sectionTitle, cards }: CardListProps) {
         contentContainerStyle={{ paddingLeft: 16 }}
       >
         {cards.map((card, index) => (
-          <TouchableOpacity key={index} style={styles.card} onPress={handleCardPress}>
-          <Image source={card.image} style={styles.cardImage} />
-          <Text style={styles.cardTitle}>{card.title}</Text>
-          <Text style={styles.cardSubtitle}>{card.time}</Text>
-          <View style={styles.cardSubtitleContainer}>
-            {/* Wrap all text strings in <Text> */}
-            <Text style={styles.cardSubtitle}>4.1</Text>
-            <MaterialIcons name="star" size={16} color="gray" />
-            <Text style={styles.cardSubtitle}>(200+)</Text>
-            <Text style={styles.cardSubtitle}> | 2 km</Text>
-          </View>
-        </TouchableOpacity>
+          <TouchableOpacity
+            key={index}
+            style={styles.card}
+            onPress={() => handleCardPress(card.id)}
+          >
+            <Image source={card.image} style={styles.cardImage} resizeMode="cover" />
+            <Text style={styles.cardTitle}>{card.title}</Text>
+            <Text style={styles.cardSubtitle}>{card.time}</Text>
+            <View style={styles.cardSubtitleContainer}>
+              <Text style={styles.cardSubtitle}>
+                {card.rating?.toFixed(1) || "4.0"}
+              </Text>
+              <MaterialIcons name="star" size={16} color="gray" style={styles.starIcon} />
+              <Text style={styles.cardSubtitle}>
+                ({card.ratingCount || 100}+)
+              </Text>
+              <Text style={styles.cardSubtitle}>
+                {" "}• {card.distanceKm || 2} km
+              </Text>
+            </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
@@ -78,8 +101,13 @@ const styles = StyleSheet.create({
     color: "#555",
   },
   cardSubtitleContainer: {
-    flexDirection: "row", // Align icon and text horizontally
-    alignItems: "center", // Vertically center the icon and text
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
   },
-
+  starIcon: {
+    marginLeft: 2,
+    marginRight: 2,
+  },
 });

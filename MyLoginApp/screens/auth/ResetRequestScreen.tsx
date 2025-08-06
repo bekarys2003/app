@@ -37,7 +37,7 @@ export default function ResetRequestScreen() {
         Alert.alert("Error", data.message || "Reset failed");
       }
     } catch (err) {
-      Alert.alert("Error", "Something went wrong");
+      Alert.alert("Error", err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }

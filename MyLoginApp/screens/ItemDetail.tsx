@@ -1,38 +1,66 @@
-import React, { useEffect, useRef } from "react";
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import Constants from "expo-constants";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedRef,
-  useScrollViewOffset,
   withTiming,
   interpolate,
   runOnJS,
   useAnimatedReaction,
   Easing,
+  useAnimatedScrollHandler
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
-
-
 const HEADER_HEIGHT = 220;
 const screenHeight = Dimensions.get("window").height;
+const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
 
 export default function ItemDetail() {
   const translateY = useSharedValue(screenHeight);
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const scrollOffset = useScrollViewOffset(scrollRef);
+  const scrollOffset = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollOffset.value = event.contentOffset.y;
+    },
+  });
   const hasNavigated = useRef(false);
+  const { id } = useLocalSearchParams();
+
+  const [item, setItem] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/fooditems/${id}/`);
+        const data = await res.json();
+        setItem(data);
+      } catch (err) {
+        console.error("Error fetching item:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItem();
+
     translateY.value = withTiming(0, {
       duration: 400,
       easing: Easing.out(Easing.exp),
     });
     scrollOffset.value = 0;
-  }, []);
+  }, [id, scrollOffset, translateY]);
 
   const navigateBack = () => {
     try {
@@ -77,6 +105,14 @@ export default function ItemDetail() {
     };
   });
 
+  if (loading || !item) {
+    return (
+      <View style={[styles.fullscreen, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <Animated.View style={[styles.fullscreen, slideInStyle]}>
       <TouchableOpacity style={styles.closeButton} onPress={goBackAnimated}>
@@ -84,17 +120,18 @@ export default function ItemDetail() {
       </TouchableOpacity>
 
       <Animated.ScrollView
-        ref={scrollRef}
+        onScroll={scrollHandler}
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: 60 }}
       >
+
         <Animated.Image
-          source={require("../assets/images/pexels-ikeen-james-1194926-2274787.jpg")}
+          source={{ uri: item.image }}
           style={[styles.image, imageAnimatedStyle]}
         />
 
         <View style={styles.content}>
-          <Text style={styles.title}>Freshslice Pizza - 610 6th Street</Text>
+          <Text style={styles.title}>{item.title}</Text>
 
           <View style={styles.ratingRow}>
             <View style={styles.stars}>
@@ -102,24 +139,24 @@ export default function ItemDetail() {
                 <Ionicons key={index} name="star" size={18} color="#FFD700" style={styles.starIcon} />
               ))}
             </View>
-            <Text style={styles.ratingText}>4.9</Text>
-            <Text style={styles.ratingSubText}> (450 ratings)</Text>
+            <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
+            <Text style={styles.ratingSubText}> ({item.rating_count} ratings)</Text>
           </View>
 
           <View style={styles.infoRow}>
             <Ionicons name="location-outline" size={18} color="#555" />
-            <Text style={styles.infoText}>13398 104 Ave, Surrey, BC</Text>
+            <Text style={styles.infoText}>{item.address}</Text>
           </View>
 
           <View style={styles.infoRow}>
             <Ionicons name="time-outline" size={18} color="#555" />
-            <Text style={styles.infoText}>Collect: 10:00 - 17:00</Text>
+            <Text style={styles.infoText}>
+              Collect: {item.pickup_start.slice(0, 5)} - {item.pickup_end.slice(0, 5)}
+            </Text>
           </View>
 
           <Text style={styles.heading}>What You Can Get</Text>
-          <Text style={styles.text}>
-            Your bag may contain a variety of delicious pizza slices the store has left over from the day to enjoy.
-          </Text>
+          <Text style={styles.text}>{item.description}</Text>
         </View>
       </Animated.ScrollView>
 

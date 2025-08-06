@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 
-    'accaunts'
+    'accaunts',
+    'listings',
 ]
 
 # CORS_ALLOWED_ORIGINS = [
@@ -144,3 +145,5 @@ AUTH_USER_MODEL = 'accaunts.User'
 EMAIL_HOST = '0.0.0.0'
 EMAIL_PORT = 1025
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
