@@ -15,6 +15,7 @@ from google.auth.transport.requests import Request
 from django.utils import timezone
 from django.http import JsonResponse
 import json
+from rest_framework.permissions import AllowAny
 
 # views.py
 class RegisterAPIView(APIView):
@@ -48,6 +49,8 @@ class RegisterAPIView(APIView):
 
 
 class LoginAPIView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data['email']
         password = request.data['password']

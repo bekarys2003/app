@@ -20,7 +20,9 @@ import Animated, {
   Easing,
   useAnimatedScrollHandler
 } from "react-native-reanimated";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 
 const HEADER_HEIGHT = 220;
 const screenHeight = Dimensions.get("window").height;
@@ -39,6 +41,7 @@ export default function ItemDetail() {
 
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [reserving, setReserving] = useState(false);
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -105,6 +108,48 @@ export default function ItemDetail() {
     };
   });
 
+  const handleReserve = async () => {
+    if (!item) return;
+    setReserving(true);
+
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      console.log("Using token:", token);
+
+      if (!token) {
+        Toast.show({ type: "error", text1: "You must be logged in to reserve." });
+        setReserving(false);
+        return;
+      }
+      const res = await fetch(`${API_BASE_URL}/reservations/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          food_item: item.id,
+          quantity: 1,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Reserved by:", data.user_email);
+        Toast.show({ type: "success", text1: "Reservation successful!" });
+      } else {
+        const data = await res.json();
+        console.error("Reservation error detail:", data);
+        Toast.show({ type: "error", text1: "Reservation failed", text2: data.detail || "Try again later." });
+      }
+    } catch (err) {
+      console.error("Reservation error:", err);
+      Toast.show({ type: "error", text1: "Something went wrong" });
+    } finally {
+      setReserving(false);
+    }
+  };
+
   if (loading || !item) {
     return (
       <View style={[styles.fullscreen, { justifyContent: "center", alignItems: "center" }]}>
@@ -124,7 +169,6 @@ export default function ItemDetail() {
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: 60 }}
       >
-
         <Animated.Image
           source={{ uri: item.image }}
           style={[styles.image, imageAnimatedStyle]}
@@ -160,8 +204,12 @@ export default function ItemDetail() {
         </View>
       </Animated.ScrollView>
 
-      <TouchableOpacity style={styles.reserveButton}>
-        <Text style={styles.reserveText}>Reserve</Text>
+      <TouchableOpacity
+        style={[styles.reserveButton, reserving && { opacity: 0.5 }]}
+        onPress={handleReserve}
+        disabled={reserving}
+      >
+        <Text style={styles.reserveText}>{reserving ? "Reserving..." : "Reserve"}</Text>
       </TouchableOpacity>
     </Animated.View>
   );

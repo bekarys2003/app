@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import FoodItemListView, FoodItemDetailView
+from .views import FoodItemListView, FoodItemDetailView, ReservationListCreateView
 
 urlpatterns = [
     path("fooditems/", FoodItemListView.as_view(), name="fooditem-list"),
     path("fooditems/<uuid:item_id>/", FoodItemDetailView.as_view(), name="fooditem-detail"),
+    path('reservations/', ReservationListCreateView.as_view(), name='reservation-list-create'),
 
 ]

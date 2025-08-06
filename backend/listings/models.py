@@ -49,3 +49,13 @@ class Store(models.Model):
 
     def __str__(self):
         return self.name
+
+class Reservation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    food_item = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
+    reserved_at = models.DateTimeField(auto_now_add=True)
+    is_collected = models.BooleanField(default=False)
+    quantity = models.PositiveIntegerField(default=1)
+
+
+

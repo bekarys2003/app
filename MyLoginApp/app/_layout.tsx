@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback, useContext } from "react";
 import * as Font from "expo-font";
 import { Asset } from "expo-asset";
 import { AuthProvider, AuthContext } from "../context/AuthContext"; // ✅ import AuthProvider and context
+import Toast from "react-native-toast-message";
 
 SplashScreen.preventAutoHideAsync(); // keep splash until ready
 
@@ -30,7 +31,12 @@ function RootLayoutInner() {
 
 
   if (isLoading) return null;
-  return <Slot />;
+  return (
+  <>
+  <Slot />
+  <Toast />
+  </>
+  );
 }
 
 export default function RootLayout() {

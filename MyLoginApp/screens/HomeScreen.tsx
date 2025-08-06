@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+  Text,
+} from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import Animated, {
   useSharedValue,
@@ -30,6 +37,7 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
 
   const [cards, setCards] = useState<CardProps[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (skipAnimation) return;
@@ -45,7 +53,24 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
     const fetchCards = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/fooditems/`);
-        const data = await res.json();
+        const text = await res.text();
+
+        console.log("Raw response:", text);
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (err) {
+          console.error("❌ JSON parse error:", err);
+          setErrorMessage("Failed to parse response.");
+          return;
+        }
+
+        if (!Array.isArray(data)) {
+          console.error("❌ Expected an array but got:", data);
+          setErrorMessage("Unexpected response format.");
+          return;
+        }
 
         const formatted: CardProps[] = data.map((item: any) => ({
           id: item.item_id,
@@ -55,12 +80,13 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
           image: { uri: item.image },
           rating: item.rating,
           ratingCount: item.rating_count,
-          distanceKm: 2, // optional static or geolocated later
+          distanceKm: 2,
         }));
 
         setCards(formatted);
       } catch (err) {
-        console.error("Error loading food items:", err);
+        console.error("❌ Error loading food items:", err);
+        setErrorMessage("Network error or server unavailable.");
       } finally {
         setLoading(false);
       }
@@ -79,6 +105,8 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
         <ScrollView style={{ flex: 1 }}>
           {loading ? (
             <ActivityIndicator style={{ marginTop: 100 }} size="large" />
+          ) : errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
           ) : (
             <>
               <CardList sectionTitle="Deals for You" cards={cards} />
@@ -97,5 +125,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingBottom: 0,
+  },
+  errorText: {
+    marginTop: 100,
+    textAlign: "center",
+    color: "red",
+    fontSize: 16,
   },
 });
