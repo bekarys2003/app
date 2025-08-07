@@ -27,7 +27,7 @@ function RootLayoutInner() {
     if (isAuthenticated && (inAuthTabs || inLogin)) {
       router.replace("/(tabs)"); // ✅ adjust this to match your app structure
     }
-  }, [isAuthenticated, isLoading, segments]);
+  }, [isAuthenticated, isLoading, segments, router]);
 
 
   if (isLoading) return null;

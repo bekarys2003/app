@@ -3,11 +3,9 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } fr
 import { useRouter } from "expo-router";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import * as AuthSession from "expo-auth-session";
 import * as AppleAuthentication from "expo-apple-authentication";
-import * as AppleAuthenticationTypes from "expo-apple-authentication";
 import { AuthContext } from "../../context/AuthContext";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -73,7 +71,7 @@ export default function AuthScreen() {
     };
 
     handleGoogleLogin();
-  }, [response]);
+  }, [response, login, router]);
 
   return (
     <View style={styles.container}>
@@ -108,7 +106,7 @@ export default function AuthScreen() {
             try {
                 setLoading(true);
 
-                const credential: AppleAuthenticationTypes.AppleAuthenticationCredential = await AppleAuthentication.signInAsync({
+                const credential: AppleAuthentication.AppleAuthenticationCredential = await AppleAuthentication.signInAsync({
                 requestedScopes: [
                     AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
                     AppleAuthentication.AppleAuthenticationScope.EMAIL,
@@ -133,7 +131,7 @@ export default function AuthScreen() {
                 const data = await res.json();
 
                 if (res.ok && data.token && data.refresh_token) {
-                    await login(data.token,  data.refresh_token); // <-- triggers isAuthenticated = true
+                    await login(data.token,  data.refresh_token);
                     router.replace("/(tabs)");
                 } else {
                 Alert.alert("Error", data.message || "Apple login failed.");

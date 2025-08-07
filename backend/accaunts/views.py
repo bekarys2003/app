@@ -19,6 +19,7 @@ from rest_framework.permissions import AllowAny
 import jwt
 import requests
 from decouple import config
+from jose import jwt as jose_jwt # type: ignore
 
 
 
@@ -211,7 +212,6 @@ class GoogleAuthAPIView(APIView):
             'refresh_token': refresh_token
         })
 
-from jose import jwt as jose_jwt
 
 @csrf_exempt
 def apple_auth_view(request):

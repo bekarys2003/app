@@ -47,7 +47,7 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
         translateX.value = withTiming(0, { duration: 250 });
       })();
     }
-  }, []);
+  }, [fromNav, skipAnimation, translateX]);
 
   useEffect(() => {
     const fetchCards = async () => {

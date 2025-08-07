@@ -36,7 +36,7 @@ export default function BrowseScreen({ skipAnimation }: Props) {
         translateX.value = withTiming(0, { duration: 250 }); // Slide in to center
       })();
     }
-  }, []);
+  }, [fromNav, skipAnimation, translateX]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],

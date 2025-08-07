@@ -3,9 +3,9 @@ import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons"; // switched
 
 const categories = [
-  { name: "grocery", icon: "basket-outline" },
-  { name: "fast food", icon: "food-outline" },
-  { name: "pastry", icon: "cookie-outline" },
+  { name: "grocery", icon: "basket-outline" as const},
+  { name: "fast food", icon: "food-outline" as const},
+  { name: "pastry", icon: "cookie-outline" as const},
 ];
 
 export default function CategoryFilters() {

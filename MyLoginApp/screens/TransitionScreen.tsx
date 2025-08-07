@@ -36,7 +36,7 @@ export default function TransitionScreen() {
       router.replace(path as "/(tabs)" | "/(tabs)/browse" | "/(tabs)/reserves");
     }, 300);
     return () => clearTimeout(timer);
-  }, [target]);
+  }, [target, router]);
 
   return (
     <View style={{ flex: 1 }}>

@@ -36,6 +36,7 @@ export default function ResetPasswordScreen() {
         Alert.alert("Error", data.message || "Reset failed");
       }
     } catch (err) {
+      console.error("Reset password error:", err);
       Alert.alert("Error", "Something went wrong.");
     } finally {
       setLoading(false);

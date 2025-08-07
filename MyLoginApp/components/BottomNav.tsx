@@ -17,9 +17,15 @@ export default function BottomNav() {
     ? "reserves"
     : "home";
 
-  const [lastClickedTab, setLastClickedTab] = useState<"home" | "browse" | "reserves" | "profile">(currentTab);
+  const [lastClickedTab, setLastClickedTab] = useState<"home" | "browse" | "reserves" | "accaunts">(currentTab);
 
-  const tabs = [
+  const tabs : {
+    name: string;
+    icon: string;
+    activeIcon: string;
+    target: "home" | "browse" | "reserves" | "accaunts";
+    path: string;
+  }[] = [
     {
       name: "Home",
       icon: "home-outline",
