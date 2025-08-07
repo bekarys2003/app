@@ -81,8 +81,8 @@ export default function RootLayout() {
   if (!isReady) return null;
 
   return (
-    <AuthProvider>
-      <RootLayoutInner />
-    </AuthProvider>
+      <AuthProvider>
+        <RootLayoutInner />
+      </AuthProvider>
   );
 }

@@ -30,8 +30,8 @@ export default function LoginScreen() {
 
       const data = await response.json();
 
-      if (response.ok && data.token) {
-        await login(data.token);
+      if (response.ok && data.token && data.refresh_token) {
+        await login(data.token, data.refresh_token);
         router.replace("/(tabs)");
       } else {
         Alert.alert("Login Failed", data.detail || "Invalid credentials.");

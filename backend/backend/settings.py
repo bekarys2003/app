@@ -25,7 +25,12 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ['*']
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8081",  # or whatever your Expo/React Native web dev URL is
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 
 # Application definition
 
@@ -157,3 +162,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ]
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8081",
+]
+
+# settings.py
+REFRESH_SECRET = config('REFRESH_SECRET')

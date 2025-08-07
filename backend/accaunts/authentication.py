@@ -1,5 +1,6 @@
-import jwt, datetime
-from django.conf import settings
+import jwt
+import datetime
+from django.conf import settings  # ✅ use Django settings instead of decouple.config
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from .models import User
@@ -10,7 +11,6 @@ class JWTAuthentication(BaseAuthentication):
 
         if not auth or len(auth) != 2 or auth[0].lower() != b"bearer":
             raise exceptions.AuthenticationFailed('Authorization header malformed or missing')
-
 
         token = auth[1].decode('utf-8')
         user_id = decode_access_token(token)
@@ -25,11 +25,12 @@ class JWTAuthentication(BaseAuthentication):
 def create_access_token(id):
     return jwt.encode({
         'user_id': id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2),
-        'iat': datetime.datetime.utcnow()
-    }, settings.SECRET_KEY, algorithm='HS256')
+        'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=20),
+        'iat': datetime.datetime.now(datetime.timezone.utc)
+    }, settings.SECRET_KEY, algorithm='HS256')  # ✅
 
 def decode_access_token(token):
+    print("🧪 Decoding with SECRET_KEY:", settings.SECRET_KEY)
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         return payload['user_id']
@@ -41,13 +42,15 @@ def decode_access_token(token):
 def create_refresh_token(id):
     return jwt.encode({
         'user_id': id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
-        'iat': datetime.datetime.utcnow()
-    }, 'refresh_secret', algorithm='HS256')
+        'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7),
+        'iat': datetime.datetime.now(datetime.timezone.utc)
+    }, settings.REFRESH_SECRET, algorithm='HS256')  # ✅
 
 def decode_refresh_token(token):
+    print("🧪 Decoding with REFRESH_SECRET:", settings.REFRESH_SECRET)
     try:
-        payload = jwt.decode(token, 'refresh_secret', algorithms=['HS256'])
+        payload = jwt.decode(token, settings.REFRESH_SECRET, algorithms=['HS256'])
         return payload['user_id']
-    except:
+    except Exception as e:
+        print("❌ Decode failed:", e)
         raise exceptions.AuthenticationFailed('unauthenticated')

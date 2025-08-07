@@ -58,8 +58,8 @@ export default function AuthScreen() {
           });
 
           const data = await res.json();
-          if (res.ok && data.token) {
-            await login(data.token); // <-- triggers isAuthenticated = true
+          if (res.ok && data.token && data.refresh_token) {
+            await login(data.token, data.refresh_token);
             router.replace("/(tabs)");
           } else {
             Alert.alert("Error", data.message || "Google login failed.");
@@ -132,8 +132,8 @@ export default function AuthScreen() {
 
                 const data = await res.json();
 
-                if (res.ok && data.token) {
-                    await login(data.token); // <-- triggers isAuthenticated = true
+                if (res.ok && data.token && data.refresh_token) {
+                    await login(data.token,  data.refresh_token); // <-- triggers isAuthenticated = true
                     router.replace("/(tabs)");
                 } else {
                 Alert.alert("Error", data.message || "Apple login failed.");

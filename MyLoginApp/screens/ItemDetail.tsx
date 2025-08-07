@@ -23,6 +23,7 @@ import Animated, {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
+import { authFetch } from "../fetch/authFetch";
 
 const HEADER_HEIGHT = 220;
 const screenHeight = Dimensions.get("window").height;
@@ -113,20 +114,8 @@ export default function ItemDetail() {
     setReserving(true);
 
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      console.log("Using token:", token);
-
-      if (!token) {
-        Toast.show({ type: "error", text1: "You must be logged in to reserve." });
-        setReserving(false);
-        return;
-      }
-      const res = await fetch(`${API_BASE_URL}/reservations/`, {
+      const res = await authFetch(`/reservations/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           food_item: item.id,
           quantity: 1,
@@ -149,6 +138,7 @@ export default function ItemDetail() {
       setReserving(false);
     }
   };
+
 
   if (loading || !item) {
     return (

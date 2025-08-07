@@ -41,7 +41,7 @@ export default function SignUpScreen() {
       const data = await response.json();
       if (response.ok && data.token) {
         console.log("Redirecting to main...");
-        await login(data.token);
+        await login(data.token, data.refresh_token);
         router.replace("/(tabs)");
       } else {
         Alert.alert("Error", data.message || "Sign up failed.");

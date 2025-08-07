@@ -55,7 +55,6 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
         const res = await fetch(`${API_BASE_URL}/fooditems/`);
         const text = await res.text();
 
-        console.log("Raw response:", text);
 
         let data;
         try {
