@@ -29,7 +29,7 @@ export default function TransitionWrapper({
       isEntering ? 0 : direction === "left" ? -screenWidth : screenWidth,
       { duration: 300 }
     );
-  }, []);
+  }, [direction, isEntering, translateX]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],

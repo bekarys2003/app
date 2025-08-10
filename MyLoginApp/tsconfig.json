@@ -1,16 +1,14 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": "./node_modules/expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
+    "moduleResolution": "Bundler",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@env": [
-        "env.d.ts"
-      ]
-    }
+      "@/*": ["./*"],
+      "@env": ["env.d.ts"]
+    },
+    "jsx": "react-jsx"
   },
   "include": [
     "**/*.ts",

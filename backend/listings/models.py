@@ -59,3 +59,12 @@ class Reservation(models.Model):
 
 
 
+
+class CartItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart_items")
+    food_item = models.ForeignKey(FoodItem, on_delete=models.CASCADE, related_name="cart_items")
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "food_item")  # one row per user+item
