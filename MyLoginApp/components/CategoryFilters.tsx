@@ -1,14 +1,23 @@
+// components/CategoryFilters.tsx
 import React from "react";
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons"; // switched
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+type CategoryKey = "grocery" | "fast food" | "pastry" | null;
 
 const categories = [
-  { name: "grocery", icon: "basket-outline" as const},
-  { name: "fast food", icon: "food-outline" as const},
-  { name: "pastry", icon: "cookie-outline" as const},
+  { key: "grocery" as const, name: "grocery", icon: "basket-outline" },
+  { key: "fast food" as const, name: "fast food", icon: "food-outline" },
+  { key: "pastry" as const, name: "pastry", icon: "cookie-outline" },
 ];
 
-export default function CategoryFilters() {
+export default function CategoryFilters({
+  selected,
+  onSelect,
+}: {
+  selected: CategoryKey;
+  onSelect: (key: CategoryKey) => void;
+}) {
   return (
     <ScrollView
       horizontal
@@ -16,12 +25,25 @@ export default function CategoryFilters() {
       contentContainerStyle={{ paddingLeft: 16 }}
       style={styles.scrollContainer}
     >
-      {categories.map((item, i) => (
-        <TouchableOpacity key={i} style={styles.categoryButton}>
-          <MaterialCommunityIcons name={item.icon} size={20} color="#000" />
-          <Text style={styles.categoryText}>{item.name}</Text>
-        </TouchableOpacity>
-      ))}
+      {categories.map((item) => {
+        const isActive = selected === item.key;
+        return (
+          <TouchableOpacity
+            key={item.key}
+            style={[styles.categoryButton, isActive && styles.categoryButtonActive]}
+            onPress={() => onSelect(isActive ? null : item.key)} // toggle off
+          >
+            <MaterialCommunityIcons
+              name={item.icon as any}
+              size={20}
+              color={isActive ? "#fff" : "#000"}
+            />
+            <Text style={[styles.categoryText, { color: isActive ? "#fff" : "#000" }]}>
+              {item.name}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </ScrollView>
   );
 }
@@ -31,7 +53,6 @@ const styles = StyleSheet.create({
     maxHeight: 34,
     marginBottom: 20,
   },
-
   categoryButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -42,6 +63,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     marginRight: 10,
     backgroundColor: "#fff",
+  },
+  categoryButtonActive: {
+    backgroundColor: "#000",
+    borderColor: "#000",
   },
   categoryText: {
     marginLeft: 6,

@@ -1,20 +1,12 @@
-import React, { useEffect, useState } from "react";
+// app/(tabs)/index.tsx (your HomeScreen)
+import React, { useEffect, useState, useCallback } from "react";
 import {
-  View,
-  ScrollView,
-  StyleSheet,
-  Dimensions,
-  ActivityIndicator,
-  Text,
+  View, ScrollView, StyleSheet, Dimensions, ActivityIndicator, Text,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  runOnUI,
-} from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnUI } from "react-native-reanimated";
 import CardList from "../components/CardList";
+import CategoryFilters from "../components/CategoryFilters"; // <- ensure correct path
 import Constants from "expo-constants";
 
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
@@ -31,6 +23,14 @@ type CardProps = {
   distanceKm?: number;
 };
 
+type CategoryKey = "grocery" | "fast food" | "pastry" | null;
+
+const UI_TO_API: Record<Exclude<CategoryKey, null>, string> = {
+  "grocery": "groceries",
+  "fast food": "meals",
+  "pastry": "pastries",
+};
+
 export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean }) {
   const translateX = useSharedValue(0);
   const { fromNav } = useLocalSearchParams();
@@ -38,6 +38,7 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
   const [cards, setCards] = useState<CardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(null);
 
   useEffect(() => {
     if (skipAnimation) return;
@@ -49,50 +50,53 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
     }
   }, [fromNav, skipAnimation, translateX]);
 
-  useEffect(() => {
-    const fetchCards = async () => {
+  const fetchCards = useCallback(async (category: CategoryKey) => {
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const qs = category ? `?category=${encodeURIComponent(UI_TO_API[category])}` : "";
+      const res = await fetch(`${API_BASE_URL}/fooditems/${qs}`);
+      const text = await res.text();
+
+      let data;
       try {
-        const res = await fetch(`${API_BASE_URL}/fooditems/`);
-        const text = await res.text();
-
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (err) {
-          console.error("❌ JSON parse error:", err);
-          setErrorMessage("Failed to parse response.");
-          return;
-        }
-
-        if (!Array.isArray(data)) {
-          console.error("❌ Expected an array but got:", data);
-          setErrorMessage("Unexpected response format.");
-          return;
-        }
-
-        const formatted: CardProps[] = data.map((item: any) => ({
-          id: item.item_id,
-          title: item.title,
-          address: item.address,
-          time: `${item.pickup_start.slice(0, 5)} - ${item.pickup_end.slice(0, 5)}`,
-          image: { uri: item.image },
-          rating: item.rating,
-          ratingCount: item.rating_count,
-          distanceKm: 2,
-        }));
-
-        setCards(formatted);
+        data = JSON.parse(text);
       } catch (err) {
-        console.error("❌ Error loading food items:", err);
-        setErrorMessage("Network error or server unavailable.");
-      } finally {
-        setLoading(false);
+        console.error("❌ JSON parse error:", err);
+        setErrorMessage("Failed to parse response.");
+        return;
       }
-    };
 
-    fetchCards();
+      if (!Array.isArray(data)) {
+        console.error("❌ Expected an array but got:", data);
+        setErrorMessage("Unexpected response format.");
+        return;
+      }
+
+      const formatted: CardProps[] = data.map((item: any) => ({
+        id: item.item_id,
+        title: item.title,
+        address: item.address,
+        time: `${item.pickup_start.slice(0, 5)} - ${item.pickup_end.slice(0, 5)}`,
+        image: { uri: item.image },
+        rating: item.rating,
+        ratingCount: item.rating_count,
+        distanceKm: 2,
+      }));
+
+      setCards(formatted);
+    } catch (err) {
+      console.error("❌ Error loading food items:", err);
+      setErrorMessage("Network error or server unavailable.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // initial + on filter change
+  useEffect(() => {
+    fetchCards(selectedCategory);
+  }, [fetchCards, selectedCategory]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -102,8 +106,14 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
     <View style={styles.container}>
       <Animated.View style={[animatedStyle, { flex: 1 }]}>
         <ScrollView style={{ flex: 1 }}>
+          {/* Category pills */}
+          <CategoryFilters
+            selected={selectedCategory}
+            onSelect={setSelectedCategory}
+          />
+
           {loading ? (
-            <ActivityIndicator style={{ marginTop: 100 }} size="large" />
+            <ActivityIndicator style={{ marginTop: 40 }} size="large" />
           ) : errorMessage ? (
             <Text style={styles.errorText}>{errorMessage}</Text>
           ) : (
@@ -120,15 +130,6 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingBottom: 0,
-  },
-  errorText: {
-    marginTop: 100,
-    textAlign: "center",
-    color: "red",
-    fontSize: 16,
-  },
+  container: { flex: 1, backgroundColor: "#fff", paddingBottom: 0 },
+  errorText: { marginTop: 100, textAlign: "center", color: "red", fontSize: 16 },
 });

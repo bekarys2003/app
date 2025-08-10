@@ -56,7 +56,6 @@ export default function TabsLayout() {
       {showHeader && !hideSearchAndCategory && (
         <>
           <SearchBar />
-          <CategoryFilters />
         </>
       )}
 

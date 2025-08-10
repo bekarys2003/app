@@ -16,11 +16,46 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import action
 from rest_framework import status
 
+# views.py
+from django.db.models import Q
+
+CATEGORY_MAP = {
+    "grocery": "groceries",
+    "groceries": "groceries",
+    "fast food": "meals",
+    "meals": "meals",
+    "pastry": "pastries",
+    "pastries": "pastries",
+}
+
 class FoodItemListView(ListAPIView):
-    queryset = FoodItem.objects.filter(available_quantity__gt=0).order_by("-created_at")
     serializer_class = FoodItemSerializer
     authentication_classes = []
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        qs = FoodItem.objects.filter(available_quantity__gt=0).order_by("-created_at")
+
+        raw = self.request.query_params.getlist("category")
+        # also accept comma-separated: ?category=grocery,fast%20food
+        if not raw:
+            comma = self.request.query_params.get("category")
+            if comma:
+                raw = [p.strip() for p in comma.split(",") if p.strip()]
+
+        if raw:
+            # normalize and map UI labels to model values
+            normalized = []
+            for r in raw:
+                key = r.strip().lower()
+                mapped = CATEGORY_MAP.get(key)
+                if mapped:
+                    normalized.append(mapped)
+            if normalized:
+                qs = qs.filter(category__in=normalized)
+
+        return qs
+
 
 class FoodItemDetailView(RetrieveAPIView):
     queryset = FoodItem.objects.all()

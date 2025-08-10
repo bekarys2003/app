@@ -6,6 +6,13 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class FoodItem(models.Model):
+    CATEGORY_CHOICES = [
+        ("meals", "Meals"),
+        ("pastries", "Pastries"),
+        ("groceries", "Groceries"),
+        ("drinks", "Drinks"),
+        ("snacks", "Snacks"),
+    ]
     item_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255)
     store = models.ForeignKey("Store", on_delete=models.CASCADE, related_name="food_items")
@@ -24,6 +31,11 @@ class FoodItem(models.Model):
     price_before = models.DecimalField(max_digits=6, decimal_places=2)
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default="meals"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
