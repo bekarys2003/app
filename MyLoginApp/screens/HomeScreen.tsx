@@ -1,12 +1,14 @@
-// app/(tabs)/index.tsx (your HomeScreen)
+// app/(tabs)/index.tsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, ScrollView, StyleSheet, Dimensions, ActivityIndicator, Text,
 } from "react-native";
+import * as Location from "expo-location";                     // 👈 NEW
 import { useLocalSearchParams } from "expo-router";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnUI } from "react-native-reanimated";
 import CardList from "../components/CardList";
-import CategoryFilters from "../components/CategoryFilters"; // <- ensure correct path
+import CategoryFilters from "../components/CategoryFilters";
+import SearchBar from "../components/SearchBar";
 import Constants from "expo-constants";
 
 const API_BASE_URL = Constants.expoConfig?.extra?.API_BASE_URL;
@@ -20,15 +22,15 @@ type CardProps = {
   image: { uri: string };
   rating?: number;
   ratingCount?: number;
-  distanceKm?: number;
+  distanceKm?: number;                                        // 👈 display this
 };
 
 type CategoryKey = "grocery" | "fast food" | "pastry" | null;
 
 const UI_TO_API: Record<Exclude<CategoryKey, null>, string> = {
-  "grocery": "groceries",
+  grocery: "groceries",
   "fast food": "meals",
-  "pastry": "pastries",
+  pastry: "pastries",
 };
 
 export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean }) {
@@ -39,7 +41,19 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(null);
+  const [search, setSearch] = useState("");
+  const [debounced, setDebounced] = useState("");
 
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null); // 👈 NEW
+  const [locDenied, setLocDenied] = useState(false);                                // 👈 NEW
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(search.trim()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Enter animation
   useEffect(() => {
     if (skipAnimation) return;
     if (fromNav === "true") {
@@ -50,11 +64,39 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
     }
   }, [fromNav, skipAnimation, translateX]);
 
-  const fetchCards = useCallback(async (category: CategoryKey) => {
+  // Ask for location once
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setLocDenied(true);                                 // 👈 fallback to non‑geo sort
+          return;
+        }
+        const pos = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      } catch {
+        setLocDenied(true);
+      }
+    })();
+  }, []);
+
+  const fetchCards = useCallback(async (category: CategoryKey, q: string) => {
     setLoading(true);
     setErrorMessage("");
     try {
-      const qs = category ? `?category=${encodeURIComponent(UI_TO_API[category])}` : "";
+      const params = new URLSearchParams();
+      if (category) params.append("category", UI_TO_API[category]);
+      if (q) params.append("q", q);
+      if (coords) {                                            // 👈 send lat/lng when available
+        params.append("lat", String(coords.lat));
+        params.append("lng", String(coords.lng));
+        // optional: params.append("max_distance_km", "25");
+      }
+
+      const qs = params.toString() ? `?${params.toString()}` : "";
       const res = await fetch(`${API_BASE_URL}/fooditems/${qs}`);
       const text = await res.text();
 
@@ -81,7 +123,7 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
         image: { uri: item.image },
         rating: item.rating,
         ratingCount: item.rating_count,
-        distanceKm: 2,
+        distanceKm: item.distance_km ?? undefined,             // 👈 map server value
       }));
 
       setCards(formatted);
@@ -91,12 +133,12 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [coords]);
 
-  // initial + on filter change
+  // initial + on filter/search/coords change
   useEffect(() => {
-    fetchCards(selectedCategory);
-  }, [fetchCards, selectedCategory]);
+    fetchCards(selectedCategory, debounced);
+  }, [fetchCards, selectedCategory, debounced]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -106,11 +148,20 @@ export default function HomeScreen({ skipAnimation }: { skipAnimation?: boolean 
     <View style={styles.container}>
       <Animated.View style={[animatedStyle, { flex: 1 }]}>
         <ScrollView style={{ flex: 1 }}>
-          {/* Category pills */}
-          <CategoryFilters
-            selected={selectedCategory}
-            onSelect={setSelectedCategory}
+          {/* Search + Category pills */}
+          <SearchBar
+            value={search}
+            onChangeText={setSearch}
+            onClear={() => setSearch("")}
+            onSubmitEditing={() => setDebounced(search.trim())}
           />
+          <CategoryFilters selected={selectedCategory} onSelect={setSelectedCategory} />
+
+          {locDenied && (
+            <Text style={{ marginLeft: 16, color: "#777", marginBottom: 6 }}>
+              Location permission denied — showing newest items.
+            </Text>
+          )}
 
           {loading ? (
             <ActivityIndicator style={{ marginTop: 40 }} size="large" />

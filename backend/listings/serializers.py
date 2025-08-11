@@ -4,6 +4,7 @@ from .models import FoodItem, Reservation, CartItem
 class FoodItemSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(source="store.name", read_only=True)
     image = serializers.ImageField(use_url=True)
+    distance_km = serializers.SerializerMethodField()
 
     class Meta:
         model = FoodItem
@@ -21,7 +22,12 @@ class FoodItemSerializer(serializers.ModelSerializer):
             "price",
             "price_before",
             "store_name",
+            "distance_km",
         ]
+
+    def get_distance_km(self, obj):
+        d = getattr(obj, "distance_km", None)
+        return round(float(d), 2) if d is not None else None
 
 
 

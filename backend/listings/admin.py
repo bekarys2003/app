@@ -4,8 +4,13 @@ from .models import Store, FoodItem, CartItem, Reservation
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ("name", "city", "is_verified", "created_at")
-    search_fields = ("name", "city")
+    list_display = ("name", "city", "is_verified", "latitude", "longitude", "created_at")
+    list_filter = ("city", "is_verified")
+    search_fields = ("name", "city", "address")
+    fieldsets = (
+        (None, {"fields": ("name", "owner", "logo", "address", "city", "phone", "is_verified")}),
+        ("Location", {"fields": ("latitude", "longitude")}),   # 👈
+    )
 
 @admin.register(FoodItem)
 class FoodItemAdmin(admin.ModelAdmin):
@@ -34,3 +39,5 @@ class ReservationAdmin(admin.ModelAdmin):
     def mark_as_collected(self, request, queryset):
         updated = queryset.update(is_collected=True)
         self.message_user(request, f"Marked {updated} reservation(s) as collected.")
+
+# listings/admin.py

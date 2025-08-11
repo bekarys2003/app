@@ -19,6 +19,13 @@ from rest_framework import status
 # views.py
 from django.db.models import Q
 
+# views.py
+import re
+from django.db.models import F, FloatField, ExpressionWrapper, Value
+from django.db.models.functions import ACos, Cos, Sin, Radians, Least, Greatest
+from django.db.models import Q
+import re
+
 CATEGORY_MAP = {
     "grocery": "groceries",
     "groceries": "groceries",
@@ -28,23 +35,29 @@ CATEGORY_MAP = {
     "pastries": "pastries",
 }
 
+def _safe_float(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
 class FoodItemListView(ListAPIView):
     serializer_class = FoodItemSerializer
     authentication_classes = []
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        qs = FoodItem.objects.filter(available_quantity__gt=0).order_by("-created_at")
+        qs = (FoodItem.objects
+              .filter(available_quantity__gt=0)
+              .select_related("store"))
 
+        # ----- category filter (supports ?category=a&category=b OR comma-separated) -----
         raw = self.request.query_params.getlist("category")
-        # also accept comma-separated: ?category=grocery,fast%20food
         if not raw:
             comma = self.request.query_params.get("category")
             if comma:
                 raw = [p.strip() for p in comma.split(",") if p.strip()]
-
         if raw:
-            # normalize and map UI labels to model values
             normalized = []
             for r in raw:
                 key = r.strip().lower()
@@ -54,7 +67,46 @@ class FoodItemListView(ListAPIView):
             if normalized:
                 qs = qs.filter(category__in=normalized)
 
+        # ----- text search (?q=...) -----
+        q = (self.request.query_params.get("q") or "").strip()
+        if q:
+            terms = [t for t in re.split(r"\s+", q) if t]
+            for term in terms:
+                qs = qs.filter(
+                    Q(title__icontains=term)
+                    | Q(description__icontains=term)
+                    | Q(address__icontains=term)
+                    | Q(store__name__icontains=term)
+                )
+
+        # ----- nearest-by-store (?lat=...&lng=...&max_distance_km=...) -----
+        lat = _safe_float(self.request.query_params.get("lat"))
+        lng = _safe_float(self.request.query_params.get("lng"))
+        max_km = _safe_float(self.request.query_params.get("max_distance_km"))
+
+        if lat is not None and lng is not None:
+            acos_arg = Least(
+                Value(1.0),
+                Greatest(
+                    Value(-1.0),
+                    Cos(Radians(Value(lat))) * Cos(Radians(F("store__latitude"))) *
+                    Cos(Radians(F("store__longitude") - Value(lng))) +
+                    Sin(Radians(Value(lat))) * Sin(Radians(F("store__latitude")))
+                ),
+            )
+            distance_expr = ExpressionWrapper(
+                Value(6371.0) * ACos(acos_arg),
+                output_field=FloatField()
+            )
+            qs = qs.annotate(distance_km=distance_expr)
+            if max_km is not None:
+                qs = qs.filter(distance_km__lte=max_km)
+            qs = qs.order_by("distance_km", "-created_at")
+        else:
+            qs = qs.order_by("-created_at")
+
         return qs
+
 
 
 class FoodItemDetailView(RetrieveAPIView):

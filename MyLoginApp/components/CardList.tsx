@@ -63,9 +63,11 @@ export default function CardList({ sectionTitle, cards }: CardListProps) {
               <Text style={styles.cardSubtitle}>
                 ({card.ratingCount || 100}+)
               </Text>
-              <Text style={styles.cardSubtitle}>
-                {" "}• {card.distanceKm || 2} km
-              </Text>
+              {typeof card.distanceKm === "number" && (
+                <Text style={{ color: "#666", marginTop: 4 }}>
+                  {card.distanceKm.toFixed(1)} km away
+                </Text>
+              )}
             </View>
           </TouchableOpacity>
         ))}
